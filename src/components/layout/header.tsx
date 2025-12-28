@@ -66,8 +66,9 @@ export function Header() {
               <DropdownMenuContent>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>My Ads</DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/profile">My Profile</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/my-ads">My Ads</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

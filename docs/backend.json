@@ -48,13 +48,28 @@
           "type": "string",
           "description": "Detailed description of the ad."
         },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the ad's image stored in Firebase Storage."
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of the ad's images stored in Firebase Storage.",
+          "items": {
+            "type": "string"
+          }
         },
         "categoryId": {
           "type": "string",
           "description": "Reference to the ad category."
+        },
+        "district": {
+          "type": "string",
+          "description": "The district where the item is located."
+        },
+        "price": {
+            "type": "number",
+            "description": "Price of the item being advertised."
+        },
+        "phoneNumber": {
+            "type": "string",
+            "description": "Contact phone number for the ad."
         }
       },
       "required": [
@@ -62,8 +77,11 @@
         "userId",
         "title",
         "description",
-        "imageUrl",
-        "categoryId"
+        "imageUrls",
+        "categoryId",
+        "district",
+        "price",
+        "phoneNumber"
       ]
     },
     "Category": {
