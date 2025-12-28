@@ -15,7 +15,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useUser, useFirestore } from '@/firebase';
-import { DollarSign, LayoutDashboard, ShoppingBag, Users } from 'lucide-react';
+import { DollarSign, LayoutDashboard, ShoppingBag, Users, Star, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -135,6 +135,22 @@ export default function AdminLayout({
                         <SidebarMenuButton isActive={isActive('/admin/ads')} tooltip="Ads">
                           <ShoppingBag />
                            Ads
+                        </SidebarMenuButton>
+                      </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <Link href="/admin/banners" legacyBehavior passHref>
+                        <SidebarMenuButton isActive={isActive('/admin/banners')} tooltip="Banners">
+                          <ImageIcon />
+                           Banners
+                        </SidebarMenuButton>
+                      </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <Link href="/admin/memberships" legacyBehavior passHref>
+                        <SidebarMenuButton isActive={isActive('/admin/memberships')} tooltip="Memberships">
+                          <Star />
+                           Memberships
                         </SidebarMenuButton>
                       </Link>
                     </SidebarMenuItem>
