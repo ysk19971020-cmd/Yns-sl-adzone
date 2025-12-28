@@ -73,6 +73,18 @@ export function Header() {
               {category.name}
             </Link>
           ))}
+           <Link
+              href={`/about`}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              About
+            </Link>
+             <Link
+              href={`/contact`}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Contact
+            </Link>
         </nav>
 
         <div className="flex items-center gap-4">
@@ -144,6 +156,20 @@ export function Header() {
                       {category.name}
                     </Link>
                   ))}
+                    <Link
+                        href={`/about`}
+                        className="font-medium text-lg"
+                        onClick={() => setOpen(false)}
+                    >
+                        About
+                    </Link>
+                    <Link
+                        href={`/contact`}
+                        className="font-medium text-lg"
+                        onClick={() => setOpen(false)}
+                    >
+                        Contact
+                    </Link>
                    {isUserLoading ? null : user ? null : (
                      <Button asChild variant="outline" onClick={() => setOpen(false)}>
                         <Link href="/login">Login</Link>
