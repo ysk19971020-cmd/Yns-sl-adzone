@@ -36,6 +36,12 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <Link
+              href={`/pricing`}
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Pricing
+            </Link>
           {categories.map((category) => (
             <Link
               key={category.slug}
@@ -88,6 +94,13 @@ export function Header() {
                   <Logo />
                 </Link>
                 <nav className="flex flex-col gap-4">
+                  <Link
+                    href={`/pricing`}
+                    className="font-medium text-lg"
+                    onClick={() => setOpen(false)}
+                  >
+                    Pricing
+                  </Link>
                   {categories.map((category) => (
                     <Link
                       key={category.slug}
