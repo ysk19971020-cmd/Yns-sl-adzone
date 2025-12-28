@@ -77,7 +77,9 @@ export function Header() {
             </Button>
           )}
 
-          <Button className="bg-accent hover:bg-accent/90">Post Ad</Button>
+          <Button asChild className="bg-accent hover:bg-accent/90">
+            <Link href="/post-ad">Post Ad</Link>
+          </Button>
           
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
