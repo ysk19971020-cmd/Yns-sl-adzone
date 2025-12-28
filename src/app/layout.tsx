@@ -38,14 +38,14 @@ export default function RootLayout({
           <FirebaseClientProvider>
             {/* Top Banner */}
             <div className="banner banner-top">
-              <Link href="/post-ad-options">
+              <Link href="/post-ad">
                 <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
               </Link>
             </div>
 
             {/* Left Banner */}
             <div className="banner banner-left">
-              <Link href="/post-ad-options">
+              <Link href="/post-ad">
                 <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
               </Link>
             </div>
@@ -56,14 +56,14 @@ export default function RootLayout({
 
             {/* Right Banner */}
             <div className="banner banner-right">
-              <Link href="/post-ad-options">
+              <Link href="/post-ad">
                 <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
               </Link>
             </div>
 
             {/* Bottom Banner */}
             <div className="banner banner-bottom">
-              <Link href="/post-ad-options">
+              <Link href="/post-ad">
                 <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
               </Link>
             </div>

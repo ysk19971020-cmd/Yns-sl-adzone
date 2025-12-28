@@ -79,7 +79,7 @@ export function Header() {
           )}
 
           <Button asChild className="bg-accent hover:bg-accent/90">
-            <Link href="/post-ad-options">Post Ad</Link>
+            <Link href="/post-ad">Post Ad</Link>
           </Button>
           
           <Sheet open={open} onOpenChange={setOpen}>

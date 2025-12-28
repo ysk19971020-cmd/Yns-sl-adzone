@@ -35,15 +35,20 @@ function PaymentBannerComponent() {
         if (!isUserLoading && !user) {
             router.push('/login');
         }
+    }, [user, isUserLoading, router]);
+
+    // This effect should run only once on mount to check for required params
+    useEffect(() => {
         if (!price || !description || !position || !duration || !whatsappLink) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
                 description: 'Banner details are missing. Please start again.',
             });
-            router.push('/post-banner-ad');
+            router.push('/post-ad');
         }
-    }, [user, isUserLoading, router, price, description, position, duration, whatsappLink, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
 
     if (isUserLoading || !user) {
@@ -55,23 +60,6 @@ function PaymentBannerComponent() {
             setPaymentSlip(event.target.files[0]);
         }
     };
-
-    // Helper function to convert data URI to File object
-    function dataURLtoFile(dataurl: string, filename: string): File | null {
-        const arr = dataurl.split(',');
-        if (arr.length < 2) return null;
-        const mimeMatch = arr[0].match(/:(.*?);/);
-        if (!mimeMatch) return null;
-        const mime = mimeMatch[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, {type:mime});
-    }
-
 
     const handleSubmit = async () => {
         if (!paymentSlip) {
@@ -93,12 +81,10 @@ function PaymentBannerComponent() {
         setIsLoading(true);
 
         try {
-            // 1. Upload banner image to Storage
             const storage = getStorage();
-            const bannerImageFile = dataURLtoFile(bannerImageDataUri, `banner_${uuidv4()}`);
-            if (!bannerImageFile) throw new Error("Could not process banner image.");
-            
-            const bannerImageExt = bannerImageFile.name.split('.').pop();
+
+            // 1. Upload banner image to Storage
+            const bannerImageExt = bannerImageDataUri.split(';')[0].split('/')[1];
             const bannerImageName = `banner_images/${user.uid}/${uuidv4()}.${bannerImageExt}`;
             const bannerStorageRef = ref(storage, bannerImageName);
             await uploadString(bannerStorageRef, bannerImageDataUri, 'data_url');
@@ -108,51 +94,65 @@ function PaymentBannerComponent() {
             const slipExt = paymentSlip.name.split('.').pop();
             const slipName = `payment_slips/${user.uid}/${uuidv4()}.${slipExt}`;
             const slipStorageRef = ref(storage, slipName);
+            
             const slipReader = new FileReader();
             slipReader.readAsDataURL(paymentSlip);
-            
             slipReader.onload = async (e) => {
-                const slipDataUrl = e.target?.result as string;
-                await uploadString(slipStorageRef, slipDataUrl, 'data_url');
-                const paymentSlipUrl = await getDownloadURL(slipStorageRef);
-    
-                // 3. Create Banner document
-                const bannerRef = await addDoc(collection(firestore, 'banners'), {
-                    userId: user.uid,
-                    imageUrl: bannerImageUrl,
-                    description: description,
-                    whatsappLink: whatsappLink,
-                    position: position,
-                    startDate: null, // To be set by admin on approval
-                    expiryDate: null, // To be set by admin on approval
-                    status: 'Pending',
-                    createdAt: serverTimestamp(),
-                });
-    
-                // 4. Create Payment document
-                await addDoc(collection(firestore, 'payments'), {
-                    userId: user.uid,
-                    paymentMethod: paymentMethod,
-                    amount: Number(price),
-                    paymentSlipUrl: paymentSlipUrl,
-                    status: 'Pending',
-                    targetId: bannerRef.id, // Link payment to the banner document
-                    paymentFor: 'Banner',
-                    createdAt: serverTimestamp(),
-                });
-    
-                toast({
-                    title: 'Payment Submitted',
-                    description: 'Your banner ad payment is being reviewed and will be activated upon approval.',
-                });
-                
-                sessionStorage.removeItem('bannerImage');
-                router.push('/');
+                try {
+                    const slipDataUrl = e.target?.result as string;
+                    await uploadString(slipStorageRef, slipDataUrl, 'data_url');
+                    const paymentSlipUrl = await getDownloadURL(slipStorageRef);
+        
+                    // 3. Create Banner document
+                    const bannerRef = await addDoc(collection(firestore, 'banners'), {
+                        userId: user.uid,
+                        imageUrl: bannerImageUrl,
+                        description: description,
+                        whatsappLink: whatsappLink,
+                        position: position,
+                        startDate: null, // To be set by admin on approval
+                        expiryDate: null, // To be set by admin on approval
+                        status: 'Pending',
+                        createdAt: serverTimestamp(),
+                    });
+        
+                    // 4. Create Payment document
+                    await addDoc(collection(firestore, 'payments'), {
+                        userId: user.uid,
+                        paymentMethod: paymentMethod,
+                        amount: Number(price),
+                        paymentSlipUrl: paymentSlipUrl,
+                        status: 'Pending',
+                        targetId: bannerRef.id, // Link payment to the banner document
+                        paymentFor: 'Banner',
+                        createdAt: serverTimestamp(),
+                    });
+        
+                    toast({
+                        title: 'Payment Submitted',
+                        description: 'Your banner ad payment is being reviewed and will be activated upon approval.',
+                    });
+                    
+                    sessionStorage.removeItem('bannerImage');
+                    router.push('/');
+                } catch (error: any) {
+                    console.error("Inner Banner Payment submission error: ", error);
+                    toast({
+                        variant: 'destructive',
+                        title: 'Submission Failed',
+                        description: error.message || 'There was an error saving your payment details.',
+                    });
+                    setIsLoading(false);
+                }
+            }
+            slipReader.onerror = (error) => {
+                 console.error("File Reader error: ", error);
+                 toast({ variant: 'destructive', title: 'File Error', description: 'Could not read the payment slip file.'});
+                 setIsLoading(false);
             }
 
-
         } catch (error: any) {
-            console.error("Banner Payment submission error: ", error);
+            console.error("Outer Banner Payment submission error: ", error);
             toast({
                 variant: 'destructive',
                 title: 'Submission Failed',
