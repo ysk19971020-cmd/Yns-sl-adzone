@@ -7,6 +7,8 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Link from 'next/link';
+import { SheetTitle, SheetDescription } from '@/components/ui/sheet';
+
 
 const ptSans = PT_Sans({
   subsets: ['latin'],

@@ -67,7 +67,7 @@ export default function Home() {
 
       <section className="w-full py-12 md:py-16 bg-card/50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center font-headline mb-8">
+          <h2 className="text-3xl font-bold text-center font-headline mb-8 add-your-ad text-foreground">
             නවතම දැන්වීම්
           </h2>
           {ads.length > 0 ? (

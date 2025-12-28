@@ -96,27 +96,23 @@
   @keyframes pulse-glow {
     0%, 100% {
       transform: scale(1);
-      text-shadow: 0 0 5px hsl(var(--accent) / 0.5);
+      text-shadow: 0 0 4px hsl(var(--accent) / 0.4);
       color: hsl(var(--accent-foreground));
     }
     50% {
       transform: scale(1.05);
-      text-shadow: 0 0 15px hsl(var(--accent) / 0.8);
+      text-shadow: 0 0 10px hsl(var(--accent) / 0.7);
       color: hsl(var(--accent));
     }
   }
 
   /* Adjust main content padding to not be obscured by banners */
-  main, header, footer {
-    @apply pl-40 pr-40;
-  }
-
-  header {
-    @apply pt-20;
+  main {
+    @apply pl-40 pr-40 pt-20;
   }
   
   footer {
-    @apply pb-20;
+    @apply pb-20 pl-40 pr-40;
   }
   
   /* On smaller screens, hide side banners and adjust padding */
@@ -124,8 +120,11 @@
     .banner-left, .banner-right {
       @apply hidden;
     }
-    main, header, footer {
+    main, footer {
       @apply pl-4 pr-4;
+    }
+    main {
+       @apply pt-20;
     }
   }
 }
