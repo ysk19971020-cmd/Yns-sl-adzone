@@ -13,6 +13,7 @@ declare global {
     interface Window {
         recaptchaVerifier?: RecaptchaVerifier;
         confirmationResult?: ConfirmationResult;
+        grecaptcha?: any;
     }
 }
 
@@ -56,7 +57,10 @@ export default function LoginPage() {
     }
     
     setIsLoading(true);
-    const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+94${phoneNumber.replace(/^0/, '')}`;
+    let formattedPhoneNumber = phoneNumber.trim();
+    if (!formattedPhoneNumber.startsWith('+')) {
+      formattedPhoneNumber = `+94${formattedPhoneNumber.replace(/^0/, '')}`;
+    }
     
     try {
       const appVerifier = getRecaptchaVerifier();
@@ -78,12 +82,9 @@ export default function LoginPage() {
         description: error.message,
       });
       // Reset reCAPTCHA
-      if (window.recaptchaVerifier) {
+      if (window.recaptchaVerifier && window.grecaptcha && auth) {
         window.recaptchaVerifier.render().then((widgetId) => {
-            if(auth) {
-                // @ts-ignore
-                grecaptcha.reset(widgetId);
-            }
+            window.grecaptcha.reset(widgetId);
         });
       }
     } finally {
