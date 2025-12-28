@@ -18,6 +18,10 @@
         "membershipId": {
           "type": "string",
           "description": "Reference to the user's active membership."
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Whether the user has administrative privileges."
         }
       },
       "required": [

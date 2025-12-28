@@ -5,7 +5,8 @@
  * The ruleset follows a "public read, owner-only write" model for shared content like ads,
  * comments, and likes. User-specific data (profiles, payments, memberships) is strictly
  * private and accessible only by the owning user. Publicly shared, static data like
- * categories and banners are read-only for all users to ensure data integrity.
+ * categories and banners are read-only for all users to ensure data integrity. Admin-level
+ * actions, like approving payments, are restricted to users with an `isAdmin` flag.
  *
  * Data Structure:
  * The data is organized into several top-level collections: /users, /ads, /categories,
@@ -13,22 +14,20 @@
  * for /comments and /likes to maintain a clear relational structure.
  *
  * Key Security Decisions:
- * - User data in /users/{userId} is strictly private to the authenticated owner.
- * - Ads, categories, and active banners are publicly readable by anyone, including
- *   unauthenticated users, to support the app's browsing functionality.
+ * - User data in /users/{userId} is strictly private to the authenticated owner, but readable
+ *   by admins.
+ * - Ads, categories, and active banners are publicly readable by anyone.
  * - All write operations (create, update, delete) are restricted. Users must be authenticated
- *   to create content, and can only modify or delete content they own.
- * - Static content collections (/categories) and admin-managed content (/banners)
- *   are locked down; writes are disallowed from the client-side to be managed by a
- *   trusted backend process.
- * - Listing documents from private collections like /payments and /memberships is disallowed
- *   to prevent data leakage. Users must know the specific document ID to fetch their data.
+ *   to create content, and can only modify or delete content they own. Admins have broader
+ *   modification rights.
+ * - Static content collections (/categories) are locked down from client-side writes.
+ * - Payments can only be created by the user, but only updated (e.g., approved/rejected) by an admin.
  *
  * Denormalization for Authorization:
  * To ensure fast and secure access control, an ownership field (typically 'userId') is
- * denormalized onto documents like ads, comments, likes, payments, and memberships. This
- * allows rules to authorize requests by inspecting the document's data directly, avoiding
- * slow and costly 'get()' calls to other documents.
+ * denormalized onto documents. This allows rules to authorize requests by inspecting the
+ * document's data directly, avoiding slow and costly 'get()' calls to other documents.
+ * The `isAdmin` flag on a user's document is used for privileged access.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -41,6 +40,11 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      // Check if the requesting user's document has the `isAdmin` flag set to true.
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
     
     // Check if the user owns the document being accessed (for read operations).
@@ -64,17 +68,17 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow get, list: if isOwner(userId);
+      allow get, list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId) && isFieldUnchanged('id');
-      allow delete: if isOwner(userId);
+      allow delete: if isOwner(userId) || isAdmin();
     }
 
     match /ads/{adId} {
       allow get, list: if true;
       allow create: if isCreatingOwner();
       allow update: if isOwner(resource.data.userId) && isFieldUnchanged('userId') && isFieldUnchanged('adId');
-      allow delete: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
     match /categories/{categoryId} {
@@ -83,33 +87,31 @@ service cloud.firestore {
     }
 
     match /memberships/{membershipId} {
-      allow get: if isDocumentOwner(get(/databases/$(database)/documents/memberships/$(membershipId)));
-      allow list: if false; // Prevent listing all memberships.
+      allow get: if isDocumentOwner(get(/databases/$(database)/documents/memberships/$(membershipId))) || isAdmin();
+      allow list: if isAdmin(); // Only admins can list all memberships.
       allow create: if isCreatingOwner();
-      allow update: if isOwner(resource.data.userId) && isFieldUnchanged('userId');
-      allow delete: if isOwner(resource.data.userId);
+      allow update: if (isOwner(resource.data.userId) && isFieldUnchanged('userId')) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
     match /banners/{bannerId} {
-      allow get, list: if resource.data.status == 'Active' && resource.data.expiryDate > request.time;
-      // Admin-only write access is implied by 'allow write: if false' and handled by backend.
-      allow write: if false;
+      allow get, list: if true; // Banners are publicly visible
+      allow write: if isAdmin(); // Only admins can create, update, or delete banners.
     }
 
-t
     match /payments/{paymentId} {
-      allow get: if isDocumentOwner(get(/databases/$(database)/documents/payments/$(paymentId)));
-      allow list: if false; // Prevent listing all payments.
+      allow get, list: if isDocumentOwner(get(/databases/$(database)/documents/payments/$(paymentId))) || isAdmin();
       allow create: if isCreatingOwner() && request.resource.data.status == 'Pending';
-      // Do not allow clients to approve their own payments or change payment details.
-      allow update, delete: if false; 
+      // Only admins can update payments (e.g., to approve or reject them).
+      allow update: if isAdmin(); 
+      allow delete: if isAdmin();
     }
 
     match /ads/{adId}/comments/{commentId} {
       allow get, list: if true;
       allow create: if isCreatingOwner() && request.resource.data.adId == adId;
       allow update: if isOwner(resource.data.userId) && isFieldUnchanged('userId') && isFieldUnchanged('adId');
-      allow delete: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
     match /ads/{adId}/likes/{likeId} {
