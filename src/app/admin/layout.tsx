@@ -14,13 +14,12 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import { DollarSign, LayoutDashboard, ShoppingBag, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Toaster } from '@/components/ui/toaster';
 
 function AdminHeader() {
@@ -36,6 +35,8 @@ function AdminHeader() {
     </header>
   );
 }
+
+const PRIMARY_ADMIN_PHONE = '+94765851997';
 
 export default function AdminLayout({
   children,
@@ -61,12 +62,26 @@ export default function AdminLayout({
       try {
         const userDocRef = doc(firestore, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists() && userDoc.data()?.isAdmin === true) {
-          setIsAdmin(true);
-        } else {
-          // If not an admin, redirect to home page
-          router.push('/');
+
+        let currentUserIsAdmin = false;
+
+        if (userDoc.exists()) {
+          currentUserIsAdmin = userDoc.data()?.isAdmin === true;
         }
+
+        // Bootstrap primary admin
+        if (user.phoneNumber === PRIMARY_ADMIN_PHONE && !currentUserIsAdmin) {
+          console.log(`Bootstrapping primary admin: ${user.uid}`);
+          await setDoc(userDocRef, { isAdmin: true }, { merge: true });
+          currentUserIsAdmin = true;
+        }
+        
+        if (!currentUserIsAdmin) {
+           router.push('/');
+        }
+        
+        setIsAdmin(currentUserIsAdmin);
+
       } catch (error) {
         console.error("Error checking admin status:", error);
         router.push('/');

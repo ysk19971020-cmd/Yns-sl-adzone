@@ -2,12 +2,12 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Menu, User } from 'lucide-react';
+import { Menu, User, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { categories } from '@/lib/data';
 import { Logo } from '@/components/logo';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getAuth, signOut } from 'firebase/auth';
-
+import { doc, getDoc } from 'firebase/firestore';
 
 export function Header() {
   const [open, setOpen] = React.useState(false);
   const { user, isUserLoading } = useUser();
   const auth = getAuth();
+  const firestore = useFirestore();
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      if (user && firestore) {
+        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+        if (userDoc.exists() && userDoc.data().isAdmin) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, [user, firestore]);
 
   const handleSignOut = () => {
     signOut(auth);
@@ -66,6 +84,14 @@ export function Header() {
               <DropdownMenuContent>
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild><Link href="/profile">My Profile</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link href="/my-ads">My Ads</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
