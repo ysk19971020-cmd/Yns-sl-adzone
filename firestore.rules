@@ -1,0 +1,178 @@
+/**
+ * This ruleset enforces a security model for the AdZone Lanka application.
+ *
+ * Core Philosophy:
+ * The ruleset follows a "public read, owner-only write" model for shared content like ads,
+ * comments, and likes. User-specific data (profiles, payments, memberships) is strictly
+ * private and accessible only by the owning user. Publicly shared, static data like
+ * categories and banners are read-only for all users to ensure data integrity.
+ *
+ * Data Structure:
+ * The data is organized into several top-level collections: /users, /ads, /categories,
+ * /memberships, /banners, and /payments. The /ads collection contains nested subcollections
+ * for /comments and /likes to maintain a clear relational structure.
+ *
+ * Key Security Decisions:
+ * - User data in /users/{userId} is strictly private to the authenticated owner.
+ * - Ads, categories, banners, comments, and likes are publicly readable by anyone, including
+ *   unauthenticated users, to support the app's browsing functionality.
+ * - All write operations (create, update, delete) are restricted. Users must be authenticated
+ *   to create content, and can only modify or delete content they own.
+ * - Static content collections (/categories, /banners) are locked down; writes are disallowed
+ *   from the client-side to be managed by a trusted backend process.
+ * - Listing documents from private collections like /payments and /memberships is disallowed
+ *   to prevent data leakage. Users must know the specific document ID to fetch their data.
+ *
+ * Denormalization for Authorization:
+ * To ensure fast and secure access control, an ownership field (typically 'userId') is
+ * denormalized onto documents like ads, comments, likes, payments, and memberships. This
+ * allows rules to authorize requests by inspecting the document's data directly, avoiding
+ * slow and costly 'get()' calls to other documents.
+ *
+ * Structural Segregation:
+ * The use of separate top-level collections for different data types (e.g., /ads vs /users)
+ * creates clear and consistent security boundaries. Subcollections like /ads/{adId}/comments
+ * inherit context from their parent path, allowing for robust relational integrity checks.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for common authorization logic.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Use for update/delete operations to ensure the document exists before applying the rule.
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Controls access to user profile documents.
+     * @path /users/{userId}
+     * @allow A user (auth.uid='user123') can (create) their own profile at /users/user123.
+     * @deny A user (auth.uid='user456') cannot (get) or (update) the profile at /users/user123.
+     * @principle Restricts access to a user's own private data tree.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to ads. Ads are public to read but can only be managed by their owner.
+     * @path /ads/{adId}
+     * @allow Any user, including unauthenticated ones, can (get) or (list) ads.
+     * @deny An authenticated user cannot (update) an ad where resource.data.userId does not match their own UID.
+     * @principle Implements a "Public Read with Owner-Only Writes" pattern.
+     */
+    match /ads/{adId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(resource.data.userId);
+    }
+
+    /**
+     * @description Controls access to ad categories. This data is public and read-only.
+     * @path /categories/{categoryId}
+     * @allow Any user, including unauthenticated ones, can (get) or (list) categories.
+     * @deny No user can (create), (update), or (delete) categories from the client.
+     * @principle Protects globally shared, static data from client modification.
+     */
+    match /categories/{categoryId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Controls access to user membership records.
+     * @path /memberships/{membershipId}
+     * @allow A user can (create) and (get) their own membership document.
+     * @deny A user cannot (get) another user's membership or (list) the entire collection.
+     * @principle Enforces document ownership for sensitive user data.
+     */
+    match /memberships/{membershipId} {
+      // CRITICAL: The security logic below assumes that each membership document contains a 'userId' field
+      // that matches the UID of the user who owns it. This field was missing from the entity schema but
+      // was specified in the reasoning document and is essential for security.
+      allow get: if isSignedIn() && isOwner(get(/databases/$(database)/documents/memberships/$(membershipId)).data.userId);
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(resource.data.userId);
+    }
+
+    /**
+     * @description Controls access to banner ads. This data is public and read-only.
+     * @path /banners/{bannerId}
+     * @allow Any user, including unauthenticated ones, can (get) or (list) banners.
+     * @deny No user can (create), (update), or (delete) banners from the client.
+     * @principle Protects globally shared, static data from client modification.
+     */
+    match /banners/{bannerId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Controls access to payment records.
+     * @path /payments/{paymentId}
+     * @allow A user can (create) and (get) their own payment records.
+     * @deny A user cannot (update) their payment status or (list) the payments collection.
+     * @principle Enforces document ownership and prevents users from self-approving payments.
+     */
+    match /payments/{paymentId} {
+      allow get: if isSignedIn() && isOwner(get(/databases/$(database)/documents/payments/$(paymentId)).data.userId);
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.status == 'Pending';
+      allow update: if false; // Status changes (e.g., 'Approved') must be done by a backend process.
+      allow delete: if isExistingOwner(resource.data.userId);
+    }
+
+    /**
+     * @description Controls access to comments on an ad.
+     * @path /ads/{adId}/comments/{commentId}
+     * @allow Any user can (get) or (list) comments. A logged-in user can (create) a new comment.
+     * @deny A user cannot (delete) a comment where resource.data.userId does not match their own UID.
+     * @principle Enables public discussion while restricting content management to the original author.
+     */
+    match /ads/{adId}/comments/{commentId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.adId == adId;
+      allow update: if isExistingOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId && request.resource.data.adId == resource.data.adId;
+      allow delete: if isExistingOwner(resource.data.userId);
+    }
+
+    /**
+     * @description Controls access to likes on an ad.
+     * @path /ads/{adId}/likes/{likeId}
+     * @allow Any user can (list) likes. A logged-in user can (create) or (delete) their own like.
+     * @deny A user cannot (update) a like document.
+     * @principle Enables public interaction while restricting like/unlike actions to the user.
+     */
+    match /ads/{adId}/likes/{likeId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid && request.resource.data.adId == adId;
+      allow update: if false; // Likes are typically not updated, only created/deleted.
+      allow delete: if isExistingOwner(resource.data.userId);
+    }
+  }
+}

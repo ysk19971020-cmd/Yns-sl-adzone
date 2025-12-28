@@ -1,0 +1,419 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the AdZone Lanka platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "User's phone number used for authentication."
+        },
+        "membershipId": {
+          "type": "string",
+          "description": "Reference to the user's active membership. (Relationship: User 1:1 Membership)"
+        }
+      },
+      "required": [
+        "id",
+        "phoneNumber"
+      ]
+    },
+    "Ad": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Ad",
+      "type": "object",
+      "description": "Represents a classified ad posted on the AdZone Lanka platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ad.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the user who posted the ad. (Relationship: User 1:N Ad)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the ad."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the ad."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the ad's image stored in Firebase Storage."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the ad category. (Relationship: Category 1:N Ad)"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "description",
+        "imageUrl",
+        "categoryId"
+      ]
+    },
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a category for classified ads.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the category.",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the category (e.g., Vehicles, Properties)."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Membership": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Membership",
+      "type": "object",
+      "description": "Represents a user's membership plan.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the membership.",
+          "format": "uuid"
+        },
+        "planType": {
+          "type": "string",
+          "description": "Type of membership plan (e.g., Silver, Gold, Platinum, Global VIP)."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Start date of the membership.",
+          "format": "date-time"
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Expiry date of the membership.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "planType",
+        "startDate",
+        "expiryDate"
+      ]
+    },
+    "Banner": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Banner",
+      "type": "object",
+      "description": "Represents a banner ad.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the banner ad.",
+          "format": "uuid"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the banner image stored in Firebase Storage."
+        },
+        "description": {
+          "type": "string",
+          "description": "Full description of the banner ad."
+        },
+        "whatsappLink": {
+          "type": "string",
+          "description": "WhatsApp auto-link for the banner ad."
+        },
+        "position": {
+          "type": "string",
+          "description": "Position of the banner ad (Top, Left, Right, Bottom)."
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Expiry date of the banner ad.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "imageUrl",
+        "description",
+        "whatsappLink",
+        "position",
+        "expiryDate"
+      ]
+    },
+    "Payment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payment",
+      "type": "object",
+      "description": "Represents a payment transaction.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the payment.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the user who made the payment. (Relationship: User 1:N Payment)"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Payment method used (Bank Transfer, eZ Cash, Dialog Genie)."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Payment amount."
+        },
+        "paymentSlipUrl": {
+          "type": "string",
+          "description": "URL of the payment slip image stored in Firebase Storage."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the payment (Pending, Approved, Rejected)."
+        },
+        "membershipId": {
+          "type": "string",
+          "description": "Reference to the membership that payment made for. (Relationship: Membership 1:1 Payment)"
+        },
+        "bannerId": {
+          "type": "string",
+          "description": "Reference to the banner that payment made for. (Relationship: Banner 1:1 Payment)"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "paymentMethod",
+        "amount",
+        "paymentSlipUrl",
+        "status"
+      ]
+    },
+    "Comment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Comment",
+      "type": "object",
+      "description": "Represents a comment on an ad.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the comment.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the user who posted the comment. (Relationship: User 1:N Comment)"
+        },
+        "adId": {
+          "type": "string",
+          "description": "Reference to the ad the comment belongs to. (Relationship: Ad 1:N Comment)"
+        },
+        "text": {
+          "type": "string",
+          "description": "The comment text."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "adId",
+        "text"
+      ]
+    },
+    "Like": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Like",
+      "type": "object",
+      "description": "Represents a like on an ad.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the like.",
+          "format": "uuid"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the user who liked the ad. (Relationship: User 1:N Like)"
+        },
+        "adId": {
+          "type": "string",
+          "description": "Reference to the ad that was liked. (Relationship: Ad 1:N Like)"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "adId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Only the authenticated user can access their own document.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/ads/{adId}",
+        "definition": {
+          "entityName": "Ad",
+          "schema": {
+            "$ref": "#/backend/entities/Ad"
+          },
+          "description": "Stores ad details. Includes 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "adId",
+              "description": "The unique identifier for the ad."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores category information. Globally readable.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier for the category."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/memberships/{membershipId}",
+        "definition": {
+          "entityName": "Membership",
+          "schema": {
+            "$ref": "#/backend/entities/Membership"
+          },
+          "description": "Stores membership details. Each membership has a 'userId' field for secure access.",
+          "params": [
+            {
+              "name": "membershipId",
+              "description": "The unique identifier for the membership."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/banners/{bannerId}",
+        "definition": {
+          "entityName": "Banner",
+          "schema": {
+            "$ref": "#/backend/entities/Banner"
+          },
+          "description": "Stores banner ad details. Globally readable, writes are restricted.",
+          "params": [
+            {
+              "name": "bannerId",
+              "description": "The unique identifier for the banner."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/payments/{paymentId}",
+        "definition": {
+          "entityName": "Payment",
+          "schema": {
+            "$ref": "#/backend/entities/Payment"
+          },
+          "description": "Stores payment records. Includes 'userId', 'membershipId', or 'bannerId' for association.",
+          "params": [
+            {
+              "name": "paymentId",
+              "description": "The unique identifier for the payment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/ads/{adId}/comments/{commentId}",
+        "definition": {
+          "entityName": "Comment",
+          "schema": {
+            "$ref": "#/backend/entities/Comment"
+          },
+          "description": "Stores comments for each ad. Includes 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "adId",
+              "description": "The unique identifier for the ad."
+            },
+            {
+              "name": "commentId",
+              "description": "The unique identifier for the comment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/ads/{adId}/likes/{likeId}",
+        "definition": {
+          "entityName": "Like",
+          "schema": {
+            "$ref": "#/backend/entities/Like"
+          },
+          "description": "Stores likes for each ad. Includes 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "adId",
+              "description": "The unique identifier for the ad."
+            },
+            {
+              "name": "likeId",
+              "description": "The unique identifier for the like."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the AdZone Lanka application's requirements, focusing on simplicity, security, and scalability. The structure prioritizes authorization independence by denormalizing data where necessary, particularly for access control. It also uses structural segregation to maintain a homogeneous security posture within collections and standard access models (path-based ownership and membership maps). The absence of an admin panel simplifies the structure considerably.\n\n**Authorization Independence and QAPs:**\n\n*   **Users Collection:** The `/users/{userId}` collection stores user profiles. Security rules will ensure that only the authenticated user (`request.auth.uid`) can access their own document. No denormalization is required here as it's private user data.\n*   **Ads Collection:** The `/ads/{adId}` collection stores ad details. To allow listing ads without requiring authentication, the security rules on the collection itself must allow read access based on a condition (e.g. `allow read: if true;`). Authorization independence is enforced because the userId is stored inside each ad document, allowing us to verify ownership. The QAP requirement is met because listing doesn't require auth.\n*   **Categories Collection:** The `/categories/{categoryId}` collection stores category information. These are globally readable, so no specific access control is needed besides preventing unauthorized modification.\n*   **Memberships Collection:** The `/memberships/{membershipId}` collection stores membership details. Each membership has a `userId` field, enabling secure reads/writes based on the membership's owner. The `membershipId` will be stored on the `user` document.\n*   **Banners Collection:** The `/banners/{bannerId}` collection stores banner ad details. These are globally readable (subject to expiry), so read access is generally open. Writes are restricted.\n*   **Payments Collection:** The `/payments/{paymentId}` collection stores payment records. Each payment record includes a `userId` for associating the payment with a user and either a `membershipId` or a `bannerId` to link it to the intended purpose. Security rules will ensure only an admin can approve or reject.\n*   **Comments Collection:** The `/ads/{adId}/comments/{commentId}` collection stores comments for each ad. Each comment will store `userId` to allow access. Only logged-in users will be able to post comments.\n*   **Likes Collection:** The `/ads/{adId}/likes/{likeId}` collection stores likes for each ad. Each like will store `userId` to allow access. Only logged-in users will be able to post likes.\n\nThis structure supports the required QAPs by:\n\n*   **Segregation:** Separating user-owned data (ads, comments, likes) into user-specific subcollections. This enables precise security rules based on the user ID.\n\n*   **Authorization Independence:** Denormalizing the userId into the `ads`, `comments` and `likes` collections to avoid `get()` calls in security rules and enable atomic operations."
+  }
+}
