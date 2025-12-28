@@ -69,21 +69,21 @@
   }
 
   .banner-top {
-    @apply top-0 left-0 right-0 h-16 border-b;
+    @apply top-0 left-0 right-0 h-20 border-b;
   }
 
   .banner-bottom {
-    @apply bottom-0 left-0 right-0 h-16 border-t;
+    @apply bottom-0 left-0 right-0 h-20 border-t;
   }
 
   .banner-left {
-    @apply left-0 top-0 bottom-0 w-32 border-r;
+    @apply left-0 top-0 bottom-0 w-40 border-r;
     writing-mode: vertical-rl;
     text-orientation: mixed;
   }
 
   .banner-right {
-    @apply right-0 top-0 bottom-0 w-32 border-l;
+    @apply right-0 top-0 bottom-0 w-40 border-l;
     writing-mode: vertical-rl;
     text-orientation: mixed;
   }
@@ -108,15 +108,15 @@
 
   /* Adjust main content padding to not be obscured by banners */
   main, header, footer {
-    @apply pl-32 pr-32;
+    @apply pl-40 pr-40;
   }
 
   header {
-    @apply pt-16;
+    @apply pt-20;
   }
   
   footer {
-    @apply pb-16;
+    @apply pb-20;
   }
   
   /* On smaller screens, hide side banners and adjust padding */
