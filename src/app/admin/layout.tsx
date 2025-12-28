@@ -36,7 +36,7 @@ function AdminHeader() {
   );
 }
 
-const PRIMARY_ADMIN_EMAIL = 'adzonelanka@gmail.com';
+const PRIMARY_ADMIN_EMAIL = 'ysk19971020@gmail.com';
 
 export default function AdminLayout({
   children,
