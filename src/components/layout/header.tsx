@@ -2,14 +2,31 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { Menu } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { categories } from '@/lib/data';
 import { Logo } from '@/components/logo';
+import { useUser } from '@/firebase';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { getAuth, signOut } from 'firebase/auth';
+
 
 export function Header() {
   const [open, setOpen] = React.useState(false);
+  const { user, isUserLoading } = useUser();
+  const auth = getAuth();
+
+  const handleSignOut = () => {
+    signOut(auth);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,7 +48,29 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-           <Button variant="ghost" className="hidden md:inline-flex">Login</Button>
+          {isUserLoading ? (
+             <Button variant="ghost" className="hidden md:inline-flex" disabled>Login</Button>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>Profile</DropdownMenuItem>
+                <DropdownMenuItem>My Ads</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild variant="ghost" className="hidden md:inline-flex">
+              <Link href="/login">Login</Link>
+            </Button>
+          )}
+
           <Button className="bg-accent hover:bg-accent/90">Post Ad</Button>
           
           <Sheet open={open} onOpenChange={setOpen}>
