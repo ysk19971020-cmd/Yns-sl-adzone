@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { categories } from '@/lib/data';
 import { Logo } from '@/components/logo';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, useAuth } from '@/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,13 +16,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getAuth, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
 export function Header() {
   const [open, setOpen] = React.useState(false);
   const { user, isUserLoading } = useUser();
-  const auth = getAuth();
+  const auth = useAuth();
   const firestore = useFirestore();
   const [isAdmin, setIsAdmin] = React.useState(false);
 
@@ -39,11 +39,15 @@ export function Header() {
         setIsAdmin(false);
       }
     };
-    checkAdmin();
-  }, [user, firestore]);
+    if (!isUserLoading) {
+      checkAdmin();
+    }
+  }, [user, firestore, isUserLoading]);
 
   const handleSignOut = () => {
-    signOut(auth);
+    if(auth) {
+      signOut(auth);
+    }
   };
 
   return (
@@ -140,6 +144,11 @@ export function Header() {
                       {category.name}
                     </Link>
                   ))}
+                   {isUserLoading ? null : user ? null : (
+                     <Button asChild variant="outline" onClick={() => setOpen(false)}>
+                        <Link href="/login">Login</Link>
+                     </Button>
+                   )}
                 </nav>
               </div>
             </SheetContent>
