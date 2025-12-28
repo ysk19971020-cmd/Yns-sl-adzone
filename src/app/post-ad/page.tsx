@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -48,13 +48,14 @@ export default function PostAdPage() {
     },
   });
 
-  if (isUserLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
 
-  if (!user) {
-    router.push('/login');
-    return null;
+  if (isUserLoading || !user) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
