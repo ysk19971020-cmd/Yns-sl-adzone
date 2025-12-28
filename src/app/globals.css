@@ -61,3 +61,71 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .banner {
+    @apply fixed bg-card/80 backdrop-blur-sm border-dashed border-primary/50 text-primary flex items-center justify-center;
+    z-index: 40; /* Below header (z-50) but above most content */
+  }
+
+  .banner-top {
+    @apply top-0 left-0 right-0 h-16 border-b;
+  }
+
+  .banner-bottom {
+    @apply bottom-0 left-0 right-0 h-16 border-t;
+  }
+
+  .banner-left {
+    @apply left-0 top-0 bottom-0 w-32 border-r;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  .banner-right {
+    @apply right-0 top-0 bottom-0 w-32 border-l;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  .add-your-ad {
+    @apply font-bold text-lg p-2 rounded-md;
+    animation: pulse-glow 2s infinite ease-in-out;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      transform: scale(1);
+      text-shadow: 0 0 5px hsl(var(--accent) / 0.5);
+      color: hsl(var(--accent-foreground));
+    }
+    50% {
+      transform: scale(1.05);
+      text-shadow: 0 0 15px hsl(var(--accent) / 0.8);
+      color: hsl(var(--accent));
+    }
+  }
+
+  /* Adjust main content padding to not be obscured by banners */
+  main, header, footer {
+    @apply pl-32 pr-32;
+  }
+
+  header {
+    @apply pt-16;
+  }
+  
+  footer {
+    @apply pb-16;
+  }
+  
+  /* On smaller screens, hide side banners and adjust padding */
+  @media (max-width: 1024px) {
+    .banner-left, .banner-right {
+      @apply hidden;
+    }
+    main, header, footer {
+      @apply pl-4 pr-4;
+    }
+  }
+}
