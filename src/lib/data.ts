@@ -1,4 +1,4 @@
-import { Car, Building2, Ban, Package } from 'lucide-react';
+import { Car, Building2, Ban, Package, Star } from 'lucide-react';
 import type { ComponentType } from 'react';
 
 export interface Ad {
@@ -21,41 +21,53 @@ export interface Category {
 }
 
 export interface PricingPlan {
-    id: 'silver' | 'gold' | 'platinum';
+    id: 'silver' | 'gold' | 'platinum' | 'global-vip';
     name: string;
     description: string;
     price: number;
+    duration: string;
     features: string[];
 }
 
 export const categories: Category[] = [
-    { slug: '18-plus', name: '18+ Ads', icon: Ban },
     { slug: 'vehicles', name: 'Vehicles', icon: Car },
     { slug: 'properties', name: 'Properties', icon: Building2 },
-    { slug: 'misc', name: 'Misc Ads', icon: Package }
+    { slug: 'misc', name: 'Misc Ads', icon: Package },
+    { slug: '18-plus', name: '18+ Ads', icon: Ban },
 ];
 
 export const pricingPlans: PricingPlan[] = [
     {
         id: 'silver',
         name: 'Silver',
-        description: 'For individuals starting out.',
-        price: 1000,
-        features: ['Post up to 5 ads', 'Basic ad visibility', 'Email support']
+        description: '3 months of unlimited ads.',
+        price: 1500,
+        duration: '3 Months',
+        features: ['Unlimited Ads for 3 months', 'Standard ad visibility', 'Email support']
     },
     {
         id: 'gold',
         name: 'Gold',
-        description: 'For small businesses and frequent posters.',
-        price: 2500,
-        features: ['Post up to 20 ads', 'Enhanced ad visibility', 'Priority email support', 'Featured ads option']
+        description: '6 months of unlimited ads.',
+        price: 3000,
+        duration: '6 Months',
+        features: ['Unlimited Ads for 6 months', 'Enhanced ad visibility', 'Priority email support']
     },
     {
         id: 'platinum',
         name: 'Platinum',
-        description: 'For power users and agencies.',
-        price: 5000,
-        features: ['Unlimited ads', 'Top ad visibility', '24/7 phone & email support', 'All ads featured']
+        description: '9 months of unlimited ads.',
+        price: 6000,
+        duration: '9 Months',
+        features: ['Unlimited Ads for 9 months', 'High ad visibility', '24/7 phone & email support']
+    },
+    {
+        id: 'global-vip',
+        name: 'Global VIP',
+        description: '1 year of unlimited ads + banner placement.',
+        price: 15000,
+        duration: '1 Year',
+        features: ['Unlimited Ads for 1 year', 'Top ad visibility', 'Includes Banner Ads', 'VIP support']
     }
 ];
 
