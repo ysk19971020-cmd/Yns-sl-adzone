@@ -38,11 +38,11 @@ export default function LoginPage() {
   }, [auth]);
 
   const handleSendOtp = async () => {
-    if (!window.recaptchaVerifier) {
+    if (!auth || !window.recaptchaVerifier) {
         toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Recaptcha not initialized.',
+            description: 'Recaptcha not initialized. Please wait a moment and try again.',
         });
         return;
     }
@@ -93,12 +93,12 @@ export default function LoginPage() {
     }
   };
 
-  if (isUserLoading || user) {
-      return <div>Loading...</div> // Or a spinner component
+  if (isUserLoading || (!isUserLoading && user)) {
+      return <div className="flex items-center justify-center min-h-screen">Loading...</div> // Or a spinner component
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-gray-100">
+    <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login</CardTitle>
