@@ -36,7 +36,7 @@ function AdminHeader() {
   );
 }
 
-const PRIMARY_ADMIN_PHONE = '+94765851997';
+const PRIMARY_ADMIN_EMAIL = 'adzonelanka@gmail.com';
 
 export default function AdminLayout({
   children,
@@ -61,16 +61,18 @@ export default function AdminLayout({
     const checkAdminStatus = async () => {
       try {
         const userDocRef = doc(firestore, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
+        let userDoc = await getDoc(userDocRef);
 
-        let currentUserIsAdmin = false;
-
-        if (userDoc.exists()) {
-          currentUserIsAdmin = userDoc.data()?.isAdmin === true;
+        // If user doc doesn't exist, create it.
+        if (!userDoc.exists()) {
+          await setDoc(userDocRef, { id: user.uid, email: user.email });
+          userDoc = await getDoc(userDocRef); // Re-fetch the doc
         }
 
-        // Bootstrap primary admin
-        if (user.phoneNumber === PRIMARY_ADMIN_PHONE && !currentUserIsAdmin) {
+        let currentUserIsAdmin = userDoc.data()?.isAdmin === true;
+
+        // Bootstrap primary admin if their email matches and they aren't admin yet
+        if (user.email === PRIMARY_ADMIN_EMAIL && !currentUserIsAdmin) {
           console.log(`Bootstrapping primary admin: ${user.uid}`);
           await setDoc(userDocRef, { isAdmin: true }, { merge: true });
           currentUserIsAdmin = true;

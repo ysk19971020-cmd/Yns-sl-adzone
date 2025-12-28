@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface UserData {
   id: string;
-  phoneNumber?: string;
+  email?: string;
   isAdmin?: boolean;
 }
 
@@ -89,7 +89,7 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Phone Number</TableHead>
+                <TableHead>Email</TableHead>
                 <TableHead>User ID</TableHead>
                 <TableHead className="text-right">Admin</TableHead>
               </TableRow>
@@ -106,11 +106,11 @@ export default function UsersPage() {
               ) : users.length > 0 ? (
                 users.map(user => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.phoneNumber || 'N/A'}</TableCell>
+                    <TableCell className="font-medium">{user.email || 'N/A'}</TableCell>
                     <TableCell className="text-muted-foreground">{user.id}</TableCell>
                     <TableCell className="text-right">
                       <Switch
-                        checked={user.isAdmin}
+                        checked={!!user.isAdmin}
                         onCheckedChange={(newIsAdmin) => handleAdminToggle(user.id, newIsAdmin)}
                         aria-label={`Toggle admin for user ${user.id}`}
                       />

@@ -42,7 +42,7 @@ const bannerAdSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters long'),
   position: z.string({ required_error: 'Please select a banner position' }),
   duration: z.string({ required_error: 'Please select a duration' }),
-  whatsappNumber: z.string().regex(/^[0-9]{9,10}$/, 'Please enter a valid 9 or 10-digit phone number'),
+  whatsappLink: z.string().url('Please enter a valid URL (e.g., https://wa.me/94...)'),
   image: z.instanceof(File).refine(file => file.size > 0, 'Please upload an image'),
 });
 type BannerAdFormValues = z.infer<typeof bannerAdSchema>;
@@ -155,13 +155,12 @@ export default function PostAdPage() {
   };
 
   const onBannerSubmit = (data: BannerAdFormValues) => {
-    const whatsappLink = `https://wa.me/94${data.whatsappNumber}`;
     const params = new URLSearchParams({
         description: data.description,
         position: data.position,
         duration: data.duration,
         price: calculatedPrice.toString(),
-        whatsappLink: whatsappLink,
+        whatsappLink: data.whatsappLink,
     });
     
     if(data.image) {
@@ -298,13 +297,10 @@ export default function PostAdPage() {
                                 )}/>
                             </div>
                             
-                            <FormField control={bannerForm.control} name="whatsappNumber" render={({ field }) => (
+                            <FormField control={bannerForm.control} name="whatsappLink" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>WhatsApp Number</FormLabel>
-                                    <div className="flex items-center">
-                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-background text-muted-foreground text-sm">+94</span>
-                                        <Input placeholder="e.g., 771234567" {...field} className="rounded-l-none" />
-                                    </div>
+                                    <FormLabel>WhatsApp Link</FormLabel>
+                                    <FormControl><Input placeholder="e.g., https://wa.me/94771234567" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />

@@ -5,27 +5,22 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
-import { useUser, useAuth } from '@/firebase';
-
-declare global {
-    interface Window {
-        recaptchaVerifier?: RecaptchaVerifier;
-        confirmationResult?: ConfirmationResult;
-        grecaptcha?: any;
-    }
-}
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { useUser, useAuth, useFirestore } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function LoginPage() {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('login');
   const { toast } = useToast();
   const router = useRouter();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
 
   useEffect(() => {
     if (!isUserLoading && user) {
@@ -33,134 +28,120 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const getRecaptchaVerifier = () => {
-    if (!auth) return;
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
-    }
-    return window.recaptchaVerifier;
-  }
-
-  const handleSendOtp = async () => {
+  const handleLogin = async () => {
     if (!auth) {
-        toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Authentication service not ready. Please try again.',
-        });
-        return;
+      toast({ variant: 'destructive', title: 'Error', description: 'Auth service not ready.' });
+      return;
     }
-    
-    setIsLoading(true);
-    let formattedPhoneNumber = phoneNumber.trim();
-    if (!formattedPhoneNumber.startsWith('+')) {
-      formattedPhoneNumber = `+94${formattedPhoneNumber.replace(/^0/, '')}`;
-    }
-    
-    try {
-      const appVerifier = getRecaptchaVerifier();
-      if (!appVerifier) {
-          throw new Error("Could not create Recaptcha verifier");
-      }
-      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhoneNumber, appVerifier);
-      window.confirmationResult = confirmationResult;
-      setOtpSent(true);
-      toast({
-        title: 'OTP Sent',
-        description: `An OTP has been sent to ${formattedPhoneNumber}.`,
-      });
-    } catch (error: any) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Error sending OTP',
-        description: error.message,
-      });
-      // Reset reCAPTCHA
-      if (window.recaptchaVerifier && window.grecaptcha && auth) {
-        window.recaptchaVerifier.render().then((widgetId) => {
-            window.grecaptcha.reset(widgetId);
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!window.confirmationResult) return;
     setIsLoading(true);
     try {
-      await window.confirmationResult.confirm(otp);
-      toast({
-        title: 'Success',
-        description: 'You have been logged in successfully.',
-      });
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({ title: 'Success', description: 'Logged in successfully.' });
       router.push('/');
     } catch (error: any) {
       console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Error verifying OTP',
-        description: error.message,
-      });
+      toast({ variant: 'destructive', title: 'Login Failed', description: error.message });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSignUp = async () => {
+    if (!auth || !firestore) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Auth or Firestore service not ready.' });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const newUser = userCredential.user;
+      
+      // Create user document in Firestore
+      await setDoc(doc(firestore, 'users', newUser.uid), {
+        id: newUser.uid,
+        email: newUser.email,
+        isAdmin: false, // Default isAdmin to false
+      });
+
+      toast({ title: 'Success', description: 'Account created successfully. You are now logged in.' });
+      router.push('/');
+    } catch (error: any) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Sign Up Failed', description: error.message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if(activeTab === 'login') {
+          handleLogin();
+      } else {
+          handleSignUp();
+      }
+  }
+
   if (isUserLoading || (!isUserLoading && user)) {
-      return <div className="flex items-center justify-center min-h-screen">Loading...</div> // Or a spinner component
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>{activeTab === 'login' ? 'Login' : 'Sign Up'}</CardTitle>
           <CardDescription>
-            {otpSent ? 'Enter the OTP sent to your phone' : 'Enter your phone number to login'}
+            Enter your email and password to {activeTab}.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {!otpSent ? (
-              <div className="space-y-2">
-                <Input
-                  type="tel"
-                  placeholder="e.g., 0771234567"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  disabled={isLoading}
-                />
-                <Button onClick={handleSendOtp} disabled={isLoading || !phoneNumber} className="w-full">
-                  {isLoading ? 'Sending OTP...' : 'Send OTP'}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Input
-                  type="text"
-                  placeholder="Enter OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  disabled={isLoading}
-                />
-                <Button onClick={handleVerifyOtp} disabled={isLoading || !otp} className="w-full">
-                  {isLoading ? 'Verifying...' : 'Verify OTP & Login'}
-                </Button>
-                 <Button variant="link" onClick={() => setOtpSent(false)} disabled={isLoading}>
-                    Back to phone number
-                </Button>
-              </div>
-            )}
-          </div>
-          <div id="recaptcha-container" className="mt-4"></div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+               <TabsContent value="login" className="m-0 p-0 space-y-4">
+                    <Input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <Button type="submit" disabled={isLoading || !email || !password} className="w-full">
+                        {isLoading ? 'Loading...' : 'Login'}
+                    </Button>
+                </TabsContent>
+                <TabsContent value="signup" className="m-0 p-0 space-y-4">
+                     <Input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <Button type="submit" disabled={isLoading || !email || !password} className="w-full">
+                        {isLoading ? 'Creating Account...' : 'Sign Up'}
+                    </Button>
+                </TabsContent>
+            </form>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

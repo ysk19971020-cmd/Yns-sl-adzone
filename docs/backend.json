@@ -11,9 +11,10 @@
           "description": "Unique identifier for the user, matching auth UID.",
           "format": "uuid"
         },
-        "phoneNumber": {
+        "email": {
           "type": "string",
-          "description": "User's phone number used for authentication."
+          "description": "User's email used for authentication.",
+          "format": "email"
         },
         "membershipId": {
           "type": "string",
@@ -26,7 +27,7 @@
       },
       "required": [
         "id",
-        "phoneNumber"
+        "email"
       ]
     },
     "Ad": {
@@ -325,7 +326,7 @@
   },
   "auth": {
     "providers": [
-      "phone"
+      "email"
     ]
   },
   "firestore": {
