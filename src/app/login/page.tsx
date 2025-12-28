@@ -9,10 +9,16 @@ import { useToast } from '@/hooks/use-toast';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { useUser, useAuth } from '@/firebase';
 
+declare global {
+    interface Window {
+        recaptchaVerifier?: RecaptchaVerifier;
+        confirmationResult?: ConfirmationResult;
+    }
+}
+
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -26,34 +32,39 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  useEffect(() => {
-    if (auth && !window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response: any) => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
-        });
+  const getRecaptchaVerifier = () => {
+    if (!auth) return;
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
     }
-  }, [auth]);
+    return window.recaptchaVerifier;
+  }
 
   const handleSendOtp = async () => {
-    if (!auth || !window.recaptchaVerifier) {
+    if (!auth) {
         toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Recaptcha not initialized. Please wait a moment and try again.',
+            description: 'Authentication service not ready. Please try again.',
         });
         return;
     }
     
     setIsLoading(true);
-    // Add country code if not present
     const formattedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber : `+94${phoneNumber.replace(/^0/, '')}`;
     
     try {
-      const result = await signInWithPhoneNumber(auth, formattedPhoneNumber, window.recaptchaVerifier);
-      setConfirmationResult(result);
+      const appVerifier = getRecaptchaVerifier();
+      if (!appVerifier) {
+          throw new Error("Could not create Recaptcha verifier");
+      }
+      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhoneNumber, appVerifier);
+      window.confirmationResult = confirmationResult;
       setOtpSent(true);
       toast({
         title: 'OTP Sent',
@@ -66,16 +77,25 @@ export default function LoginPage() {
         title: 'Error sending OTP',
         description: error.message,
       });
+      // Reset reCAPTCHA
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.render().then((widgetId) => {
+            if(auth) {
+                // @ts-ignore
+                grecaptcha.reset(widgetId);
+            }
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (!confirmationResult) return;
+    if (!window.confirmationResult) return;
     setIsLoading(true);
     try {
-      await confirmationResult.confirm(otp);
+      await window.confirmationResult.confirm(otp);
       toast({
         title: 'Success',
         description: 'You have been logged in successfully.',
@@ -144,10 +164,4 @@ export default function LoginPage() {
       </Card>
     </div>
   );
-}
-
-declare global {
-    interface Window {
-        recaptchaVerifier?: RecaptchaVerifier;
-    }
 }
