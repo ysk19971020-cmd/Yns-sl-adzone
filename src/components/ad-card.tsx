@@ -20,7 +20,6 @@ export function AdCard({ ad }: AdCardProps) {
               alt={ad.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              data-ai-hint={ad.imageHint}
             />
             <Badge variant="secondary" className="absolute top-2 right-2">{ad.categoryName}</Badge>
           </div>

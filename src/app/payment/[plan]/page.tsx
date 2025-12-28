@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, getSdks } from '@/firebase';
 import { pricingPlans } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { v4 as uuidv4 } from 'uuid'; // To generate unique file names
-
-// Mocking uuid if it's not available in the environment
-const v4 = uuidv4 || (() => Math.random().toString(36).substring(2, 15));
-
+import { v4 as uuidv4 } from 'uuid'; 
 
 export default function PaymentPage() {
     const { plan } = useParams();
@@ -59,13 +55,22 @@ export default function PaymentPage() {
             return;
         }
 
+        if (!firestore) {
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Database not available. Please try again later.',
+            });
+            return;
+        }
+
         setIsLoading(true);
 
         try {
             // 1. Upload image to Firebase Storage
             const storage = getStorage();
             const fileExtension = paymentSlip.name.split('.').pop();
-            const fileName = `payment_slips/${user.uid}/${v4()}.${fileExtension}`;
+            const fileName = `payment_slips/${user.uid}/${uuidv4()}.${fileExtension}`;
             const storageRef = ref(storage, fileName);
             await uploadBytes(storageRef, paymentSlip);
             const imageUrl = await getDownloadURL(storageRef);
@@ -74,12 +79,12 @@ export default function PaymentPage() {
             const paymentsCollection = collection(firestore, 'payments');
             await addDoc(paymentsCollection, {
                 userId: user.uid,
-                planId: selectedPlan.id,
-                planName: selectedPlan.name,
-                amount: selectedPlan.price,
                 paymentMethod: paymentMethod,
+                amount: selectedPlan.price,
                 paymentSlipUrl: imageUrl,
                 status: 'Pending',
+                targetId: selectedPlan.id,
+                paymentFor: 'Membership',
                 createdAt: serverTimestamp(),
             });
 

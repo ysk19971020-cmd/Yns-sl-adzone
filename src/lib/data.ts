@@ -22,7 +22,7 @@ export interface Category {
 
 export interface PricingPlan {
     id: 'silver' | 'gold' | 'platinum' | 'global-vip';
-    name: string;
+    name:string;
     description: string;
     price: number;
     duration: string;

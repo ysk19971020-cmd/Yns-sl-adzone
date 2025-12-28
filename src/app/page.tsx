@@ -49,7 +49,7 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {categories.map((category) => {
-              const Icon = category.icon as LucideIcon;
+              const Icon = category.icon;
               return (
                 <Link href={`/category/${category.slug}`} key={category.slug}>
                   <div className="group flex flex-col items-center justify-center p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center">
@@ -70,14 +70,22 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center font-headline mb-8">
             Latest Ads
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {ads.map((ad) => (
-              <AdCard key={ad.id} ad={ad} />
-            ))}
-          </div>
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">View More Ads</Button>
-          </div>
+          {ads.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {ads.map((ad) => (
+                  <AdCard key={ad.id} ad={ad} />
+                ))}
+              </div>
+              <div className="text-center mt-12">
+                <Button variant="outline" size="lg">View More Ads</Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-muted-foreground py-16">
+              <p>No ads posted yet. Be the first!</p>
+            </div>
+          )}
         </div>
       </section>
     </div>
