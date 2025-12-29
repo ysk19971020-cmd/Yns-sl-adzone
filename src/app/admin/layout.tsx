@@ -46,64 +46,63 @@ export default function AdminLayout({
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
-  const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
   useEffect(() => {
-    if (isUserLoading || !firestore) return;
+    if (isUserLoading || !firestore) {
+      return;
+    }
 
     if (!user) {
       router.push('/login');
       return;
     }
 
+    // New simplified logic
     const checkAdminStatus = async () => {
-      try {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
+      const isAdminByEmail = user.email === PRIMARY_ADMIN_EMAIL;
 
-        let userData = userDoc.data();
-        let currentUserIsAdmin = userData?.isAdmin === true;
-
-        if (!userDoc.exists()) {
-             const isPrimaryAdmin = user.email === PRIMARY_ADMIN_EMAIL;
-             const initialData = { 
-                id: user.uid, 
-                email: user.email, 
-                isAdmin: isPrimaryAdmin 
-             };
-             await setDoc(userDocRef, initialData, { merge: true });
-             currentUserIsAdmin = isPrimaryAdmin;
-        } else if (user.email === PRIMARY_ADMIN_EMAIL && !currentUserIsAdmin) {
-             await setDoc(userDocRef, { isAdmin: true }, { merge: true });
-             currentUserIsAdmin = true;
+      if (!isAdminByEmail) {
+        // If not the primary admin, check Firestore for the isAdmin flag
+        try {
+          const userDocRef = doc(firestore, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists() && userDoc.data().isAdmin === true) {
+            setIsAdmin(true);
+          } else {
+            router.push('/');
+          }
+        } catch (error) {
+          console.error("Error checking secondary admin status:", error);
+          router.push('/');
         }
-        
-        if (!currentUserIsAdmin) {
-           router.push('/');
+      } else {
+        // This is the primary admin
+        setIsAdmin(true);
+        // Ensure the isAdmin flag is set in Firestore for the primary admin
+        try {
+            const userDocRef = doc(firestore, 'users', user.uid);
+            await setDoc(userDocRef, { isAdmin: true }, { merge: true });
+        } catch (error) {
+            console.error("Failed to set primary admin flag in Firestore:", error);
         }
-        
-        setIsAdmin(currentUserIsAdmin);
-
-      } catch (error) {
-        console.error("Error checking admin status:", error);
-        router.push('/');
-      } finally {
-        setIsCheckingAdmin(false);
       }
+
+      setIsCheckingAdmin(false);
     };
 
     checkAdminStatus();
 
   }, [user, isUserLoading, firestore, router]);
+  
 
   if (isCheckingAdmin || isUserLoading) {
     return <div className="flex h-screen items-center justify-center">Checking permissions...</div>;
   }
   
   if (!isAdmin) {
-     return <div className="flex h-screen items-center justify-center">You do not have permission to view this page.</div>;
+     return null; // Don't render anything, router.push will handle redirection
   }
 
   const isActive = (path: string) => pathname === path;

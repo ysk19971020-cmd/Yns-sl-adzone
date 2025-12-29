@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { categories } from '@/lib/data';
 import { Logo } from '@/components/logo';
-import { useUser, useFirestore, useAuth } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,37 +17,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+
+const PRIMARY_ADMIN_EMAIL = 'ysk19971020@gmail.com';
 
 export function Header() {
   const [open, setOpen] = React.useState(false);
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  const firestore = useFirestore();
-  const [isAdmin, setIsAdmin] = React.useState(false);
-
-  React.useEffect(() => {
-    const checkAdmin = async () => {
-      if (user && firestore) {
-        try {
-            const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-            if (userDoc.exists() && userDoc.data().isAdmin === true) {
-              setIsAdmin(true);
-            } else {
-              setIsAdmin(false);
-            }
-        } catch (error) {
-            console.error("Error checking admin status in header:", error);
-            setIsAdmin(false);
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    };
-    if (!isUserLoading) {
-      checkAdmin();
-    }
-  }, [user, firestore, isUserLoading]);
+  
+  // The isAdmin state is determined by checking the user's email.
+  const isAdmin = !isUserLoading && user?.email === PRIMARY_ADMIN_EMAIL;
 
   const handleSignOut = () => {
     if(auth) {
@@ -94,7 +73,9 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           {isUserLoading ? (
-             <Button variant="ghost" className="hidden md:inline-flex" disabled>Login</Button>
+             <Button variant="ghost" size="icon" disabled>
+                <User />
+             </Button>
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -120,8 +101,10 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild variant="ghost" className="hidden md:inline-flex">
-              <Link href="/login">Login</Link>
+             <Button asChild variant="ghost" size="icon">
+                <Link href="/login">
+                    <User />
+                </Link>
             </Button>
           )}
 
