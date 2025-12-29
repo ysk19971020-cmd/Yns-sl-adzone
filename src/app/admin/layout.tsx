@@ -5,7 +5,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarMenuItem,
@@ -46,6 +45,7 @@ export default function AdminLayout({
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
@@ -59,36 +59,33 @@ export default function AdminLayout({
       return;
     }
 
-    // New simplified logic
     const checkAdminStatus = async () => {
       const isAdminByEmail = user.email === PRIMARY_ADMIN_EMAIL;
+      let currentUserIsAdmin = isAdminByEmail;
 
-      if (!isAdminByEmail) {
-        // If not the primary admin, check Firestore for the isAdmin flag
-        try {
-          const userDocRef = doc(firestore, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists() && userDoc.data().isAdmin === true) {
-            setIsAdmin(true);
-          } else {
-            router.push('/');
-          }
-        } catch (error) {
-          console.error("Error checking secondary admin status:", error);
-          router.push('/');
-        }
-      } else {
-        // This is the primary admin
-        setIsAdmin(true);
-        // Ensure the isAdmin flag is set in Firestore for the primary admin
-        try {
-            const userDocRef = doc(firestore, 'users', user.uid);
+      try {
+        const userDocRef = doc(firestore, 'users', user.uid);
+        
+        if (isAdminByEmail) {
             await setDoc(userDocRef, { isAdmin: true }, { merge: true });
-        } catch (error) {
-            console.error("Failed to set primary admin flag in Firestore:", error);
         }
-      }
+        
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists() && userDoc.data().isAdmin === true) {
+            currentUserIsAdmin = true;
+        } else if (!isAdminByEmail) {
+             router.push('/');
+             return;
+        }
 
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+        router.push('/');
+        return;
+      }
+      
+      setIsAdmin(currentUserIsAdmin);
       setIsCheckingAdmin(false);
     };
 
