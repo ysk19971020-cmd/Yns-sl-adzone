@@ -72,11 +72,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {isUserLoading ? (
-             <Button variant="ghost" size="icon" disabled>
-                <User />
-             </Button>
-          ) : user ? (
+          {isUserLoading ? null : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
