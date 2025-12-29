@@ -234,8 +234,8 @@
         },
         "paymentMethod": {
           "type": "string",
-          "description": "Payment method used (Bank Transfer, eZ Cash, Dialog Genie).",
-          "enum": ["Bank Transfer", "eZ Cash", "Dialog Genie"]
+          "description": "Payment method used (Bank Transfer, eZ Cash, Dialog Genie, Card Payment).",
+          "enum": ["Bank Transfer", "eZ Cash", "Dialog Genie", "Card Payment"]
         },
         "amount": {
           "type": "number",
@@ -243,7 +243,7 @@
         },
         "paymentSlipUrl": {
           "type": "string",
-          "description": "URL of the payment slip image stored in Firebase Storage."
+          "description": "URL of the payment slip image stored in Firebase Storage for manual payments."
         },
         "status": {
           "type": "string",
@@ -265,7 +265,6 @@
         "userId",
         "paymentMethod",
         "amount",
-        "paymentSlipUrl",
         "status",
         "targetId",
         "paymentFor"
@@ -420,3 +419,4 @@
     "reasoning": "The data model is structured to support the core features of the AdZone Lanka application, including memberships, banner ads, and various interactions like comments and likes. A key principle is denormalizing the `userId` field into most documents to allow for independent and efficient security rule enforcement without needing expensive `get()` calls. Collections are segregated by data type for clear, maintainable rules. Public content like ads and categories is world-readable, while user-specific data like memberships and payments is private. Write access is strictly controlled, generally limited to the document owner or, in the case of system-level data (categories, banner approvals), disallowed from the client entirely."
   }
 }
+    

@@ -12,6 +12,9 @@ import { useToast } from '@/hooks/use-toast';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid'; 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CreditCard } from 'lucide-react';
+
 
 function PaymentBannerComponent() {
     const router = useRouter();
@@ -23,6 +26,7 @@ function PaymentBannerComponent() {
     const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
     const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("manual");
     
     // Read banner details from URL
     const description = searchParams.get('description');
@@ -63,7 +67,7 @@ function PaymentBannerComponent() {
         }
     };
 
-    const handleSubmit = async () => {
+    const handleManualSubmit = async () => {
         if (!paymentSlip) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please upload your payment slip.' });
             return;
@@ -105,14 +109,11 @@ function PaymentBannerComponent() {
                     await uploadString(slipStorageRef, slipDataUrl, 'data_url');
                     const paymentSlipUrl = await getDownloadURL(slipStorageRef);
                     
-                    // Create WhatsApp link from number
-                    const cleanedNumber = whatsappNumber?.replace(/[^0-9]/g, '');
-                    const finalNumber = cleanedNumber?.startsWith('0') ? '94' + cleanedNumber.substring(1) : cleanedNumber;
-                    const whatsappLink = `https://wa.me/${finalNumber}`;
+                    const bannerId = uuidv4();
 
                     // 3. Create Banner document
                     const bannerRef = await addDoc(collection(firestore, 'banners'), {
-                        id: uuidv4(),
+                        id: bannerId,
                         userId: user.uid,
                         imageUrl: bannerImageUrl,
                         description: description,
@@ -133,7 +134,7 @@ function PaymentBannerComponent() {
                         amount: Number(price),
                         paymentSlipUrl: paymentSlipUrl,
                         status: 'Pending',
-                        targetId: bannerRef.id, // Link payment to the banner document
+                        targetId: bannerId,
                         paymentFor: 'Banner',
                         createdAt: serverTimestamp(),
                     });
@@ -171,6 +172,16 @@ function PaymentBannerComponent() {
              setIsLoading(false);
         }
     };
+    
+    const handleCardSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        toast({
+            title: "Coming Soon!",
+            description: "Card payments are not yet available. Please use a manual payment method for now.",
+            variant: "default",
+        });
+    }
+
 
     return (
         <div className="container mx-auto max-w-2xl py-12">
@@ -187,62 +198,96 @@ function PaymentBannerComponent() {
                         <div className="flex justify-between text-lg"><span className="text-muted-foreground">Total:</span> <span className="font-bold text-primary">LKR {Number(price).toLocaleString()}</span></div>
                     </div>
 
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <h3 className="font-semibold text-lg mb-3">Payment Instructions</h3>
-                        <p className="text-sm text-muted-foreground mb-4">Please make a payment of LKR {Number(price).toLocaleString()} using one of the methods below.</p>
-                        
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold">1. Bank Transfer</h4>
-                                <ul className="mt-1 text-sm space-y-1 pl-4 list-disc list-inside">
-                                    <li><strong>Bank:</strong> Sampath Bank</li>
-                                    <li><strong>Account Name:</strong> J A Y S Kavinada</li>
-                                    <li><strong>Account Number:</strong> 121212121212</li>
-                                    <li><strong>Branch:</strong> Kalutara</li>
-                                </ul>
-                            </div>
-                            
-                            <div>
-                                <h4 className="font-semibold">2. eZ Cash</h4>
-                                <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="manual">Bank/Manual Transfer</TabsTrigger>
+                            <TabsTrigger value="card">Card Payment</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="manual" className="pt-6">
+                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <h3 className="font-semibold text-lg mb-3">Payment Instructions</h3>
+                                <p className="text-sm text-muted-foreground mb-4">Please make a payment of LKR {Number(price).toLocaleString()} using one of the methods below.</p>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="font-semibold">1. Bank Transfer</h4>
+                                        <ul className="mt-1 text-sm space-y-1 pl-4 list-disc list-inside">
+                                            <li><strong>Bank:</strong> Sampath Bank</li>
+                                            <li><strong>Account Name:</strong> J A Y S Kavinada</li>
+                                            <li><strong>Account Number:</strong> 121212121212</li>
+                                            <li><strong>Branch:</strong> Kalutara</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 className="font-semibold">2. eZ Cash</h4>
+                                        <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="font-semibold">3. Genie</h4>
+                                        <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                                    </div>
+                                </div>
+
+                                 <p className="text-xs text-muted-foreground mt-4">For bank transfers, please use your phone number as the reference. After payment, upload the slip below.</p>
                             </div>
 
-                            <div>
-                                <h4 className="font-semibold">3. Genie</h4>
-                                <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                            <div className="space-y-4 mt-6">
+                                <Label>Select Payment Method Used</Label>
+                                <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="Bank Transfer" id="bank" />
+                                        <Label htmlFor="bank">Bank Transfer</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="eZ Cash" id="ezcash" />
+                                        <Label htmlFor="ezcash">eZ Cash</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="Dialog Genie" id="genie" />
+                                        <Label htmlFor="genie">Dialog Genie</Label>
+                                    </div>
+                                </RadioGroup>
                             </div>
-                        </div>
 
-                         <p className="text-xs text-muted-foreground mt-4">For bank transfers, please use your phone number as the reference. After payment, upload the slip below.</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <Label>Select Payment Method Used</Label>
-                        <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="Bank Transfer" id="bank" />
-                                <Label htmlFor="bank">Bank Transfer</Label>
+                            <div className="space-y-2 mt-6">
+                                <Label htmlFor="payment-slip">Upload Payment Slip</Label>
+                                <Input id="payment-slip" type="file" accept="image/*" onChange={handleFileChange} />
+                                <p className="text-xs text-muted-foreground">Please upload a clear image of your bank slip or transaction receipt.</p>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="eZ Cash" id="ezcash" />
-                                <Label htmlFor="ezcash">eZ Cash</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="Dialog Genie" id="genie" />
-                                <Label htmlFor="genie">Dialog Genie</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="payment-slip">Upload Payment Slip</Label>
-                        <Input id="payment-slip" type="file" accept="image/*" onChange={handleFileChange} />
-                        <p className="text-xs text-muted-foreground">Please upload a clear image of your bank slip or transaction receipt.</p>
-                    </div>
-
-                    <Button onClick={handleSubmit} disabled={isLoading || !paymentSlip} className="w-full" size="lg">
-                        {isLoading ? 'Submitting...' : `Submit Payment of LKR ${Number(price).toLocaleString()}`}
-                    </Button>
+                            <Button onClick={handleManualSubmit} disabled={isLoading || !paymentSlip} className="w-full mt-6" size="lg">
+                                {isLoading ? 'Submitting...' : `Submit Payment of LKR ${Number(price).toLocaleString()}`}
+                            </Button>
+                        </TabsContent>
+                        <TabsContent value="card" className="pt-6">
+                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                                <h3 className="font-semibold text-lg">Coming Soon!</h3>
+                                <p className="text-sm text-muted-foreground mt-1">Online card payments will be available shortly.</p>
+                           </div>
+                           <form onSubmit={handleCardSubmit} className="space-y-4 mt-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="card-number">Card Number</Label>
+                                    <Input id="card-number" placeholder="•••• •••• •••• ••••" disabled />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="expiry-date">Expiry Date</Label>
+                                        <Input id="expiry-date" placeholder="MM / YY" disabled />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="cvc">CVC</Label>
+                                        <Input id="cvc" placeholder="•••" disabled />
+                                    </div>
+                                </div>
+                                <Button type="submit" className="w-full" size="lg" disabled>
+                                    <CreditCard className="mr-2 h-4 w-4" />
+                                    Pay LKR {Number(price).toLocaleString()} Securely
+                                </Button>
+                           </form>
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
             </Card>
         </div>
@@ -257,3 +302,5 @@ export default function PaymentBannerPage() {
         </Suspense>
     )
 }
+
+    
