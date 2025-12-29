@@ -30,8 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  // Banner logic is now handled by individual pages, not the root layout.
-  const isVehiclePage = pathname === '/category/vehicles';
+  const showBanners = pathname === '/';
 
 
   return (
@@ -46,7 +45,7 @@ export default function RootLayout({
       <body className={cn('min-h-screen bg-background font-body antialiased', ptSans.variable)}>
         <div className="relative flex min-h-screen flex-col">
           <FirebaseClientProvider>
-            <Header showBanners={!isVehiclePage} />
+            <Header showBanners={showBanners} />
             <main className="flex-1">{children}</main>
             <Footer />
             <Toaster />
