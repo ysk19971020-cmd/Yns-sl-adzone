@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { signOut } from 'firebase/auth';
 import { cn } from '@/lib/utils';
+import { doc, getDoc } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 const PRIMARY_ADMIN_EMAIL = 'ysk19971020@gmail.com';
 
@@ -25,9 +27,31 @@ export function Header() {
   const [open, setOpen] = React.useState(false);
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
-  
-  // This state is derived from the user object, which is now stable after the loading state is handled.
-  const isAdmin = user?.email === PRIMARY_ADMIN_EMAIL;
+  const firestore = useFirestore();
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      if (user && firestore) {
+        if (user.email === PRIMARY_ADMIN_EMAIL) {
+          setIsAdmin(true);
+          return;
+        }
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().isAdmin) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    if (!isUserLoading) {
+      checkAdmin();
+    }
+  }, [user, isUserLoading, firestore]);
 
   const handleSignOut = () => {
     if(auth) {
@@ -73,11 +97,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {isUserLoading ? (
-             <Button variant="ghost" size="icon" disabled>
-                <User />
-             </Button>
-          ) : user ? (
+          {isUserLoading ? null : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
