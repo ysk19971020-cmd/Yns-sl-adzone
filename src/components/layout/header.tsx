@@ -29,6 +29,13 @@ export function Header() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [isAdmin, setIsAdmin] = React.useState(false);
+  
+  // State to prevent hydration mismatch
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   React.useEffect(() => {
     const checkAdmin = async () => {
@@ -37,12 +44,17 @@ export function Header() {
           setIsAdmin(true);
           return;
         }
-        const userDocRef = doc(firestore, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists() && userDoc.data().isAdmin) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+        try {
+            const userDocRef = doc(firestore, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists() && userDoc.data().isAdmin) {
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
+        } catch (error) {
+            console.error("Error checking admin status:", error);
+            setIsAdmin(false);
         }
       } else {
         setIsAdmin(false);
@@ -97,44 +109,50 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {isUserLoading ? null : user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <User />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {isAdmin && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin">
-                        <Shield className="mr-2 h-4 w-4" />
-                        <span>Admin Panel</span>
-                      </Link>
-                    </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild><Link href="/profile">My Profile</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link href="/my-ads">My Ads</Link></DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-             <Button asChild variant="ghost" size="icon">
-                <Link href="/login">
+          {isClient && !isUserLoading ? (
+            user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
                     <User />
-                </Link>
-            </Button>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Admin Panel</span>
+                        </Link>
+                      </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild><Link href="/profile">My Profile</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/my-ads">My Ads</Link></DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+               <Button asChild variant="ghost" size="icon">
+                  <Link href="/login">
+                      <User />
+                  </Link>
+              </Button>
+            )
+          ) : (
+             <Button variant="ghost" size="icon" disabled>
+                <User />
+             </Button>
           )}
 
-          {isUserLoading ? (
-            <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
-          ) : (
+          {isClient && !isUserLoading ? (
             <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
               Post Ad
             </Link>
+          ) : (
+             <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
           )}
           
           <Sheet open={open} onOpenChange={setOpen}>
@@ -183,11 +201,11 @@ export function Header() {
                     >
                         Contact
                     </Link>
-                   {isUserLoading ? null : user ? null : (
+                   {isClient && !isUserLoading && !user ? (
                      <Button asChild variant="outline" onClick={() => setOpen(false)}>
                         <Link href="/login">Login</Link>
                      </Button>
-                   )}
+                   ) : null}
                 </nav>
               </div>
             </SheetContent>
