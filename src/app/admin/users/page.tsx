@@ -47,14 +47,16 @@ export default function UsersPage() {
 
   const handleAdminToggle = async (userId: string, newIsAdmin: boolean) => {
     if (!firestore) return;
+    
+    // Optimistically update the UI
+    setUsers(currentUsers =>
+      currentUsers.map(u => (u.id === userId ? { ...u, isAdmin: newIsAdmin } : u))
+    );
+
     try {
       const userDocRef = doc(firestore, 'users', userId);
-      // Use setDoc with merge to create the doc if it doesn't exist, or update it if it does.
       await setDoc(userDocRef, { isAdmin: newIsAdmin }, { merge: true });
       
-      setUsers(currentUsers =>
-        currentUsers.map(u => (u.id === userId ? { ...u, isAdmin: newIsAdmin } : u))
-      );
       toast({
         title: 'Success',
         description: `User admin status updated.`,

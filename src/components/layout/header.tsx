@@ -29,11 +29,16 @@ export function Header() {
   React.useEffect(() => {
     const checkAdmin = async () => {
       if (user && firestore) {
-        const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-        if (userDoc.exists() && userDoc.data().isAdmin) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+        try {
+            const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+            if (userDoc.exists() && userDoc.data().isAdmin === true) {
+              setIsAdmin(true);
+            } else {
+              setIsAdmin(false);
+            }
+        } catch (error) {
+            console.error("Error checking admin status in header:", error);
+            setIsAdmin(false);
         }
       } else {
         setIsAdmin(false);

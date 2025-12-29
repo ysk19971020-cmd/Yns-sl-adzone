@@ -66,8 +66,6 @@ export default function AdminLayout({
         let userData = userDoc.data();
         let currentUserIsAdmin = userData?.isAdmin === true;
 
-        // If user doc doesn't exist or is missing isAdmin, create/update it.
-        // Also handle bootstrapping the primary admin.
         if (!userDoc.exists()) {
              const isPrimaryAdmin = user.email === PRIMARY_ADMIN_EMAIL;
              const initialData = { 
@@ -75,10 +73,9 @@ export default function AdminLayout({
                 email: user.email, 
                 isAdmin: isPrimaryAdmin 
              };
-             await setDoc(userDocRef, initialData);
+             await setDoc(userDocRef, initialData, { merge: true });
              currentUserIsAdmin = isPrimaryAdmin;
         } else if (user.email === PRIMARY_ADMIN_EMAIL && !currentUserIsAdmin) {
-             // If the user exists but isn't admin and should be, elevate them.
              await setDoc(userDocRef, { isAdmin: true }, { merge: true });
              currentUserIsAdmin = true;
         }
