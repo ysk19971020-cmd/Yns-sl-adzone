@@ -30,6 +30,8 @@ function PaymentBannerComponent() {
     const duration = searchParams.get('duration');
     const price = searchParams.get('price');
     const whatsappLink = searchParams.get('whatsappLink');
+    const categoryId = searchParams.get('categoryId');
+
 
     useEffect(() => {
         if (!isUserLoading && !user) {
@@ -39,7 +41,7 @@ function PaymentBannerComponent() {
 
     // This effect should run only once on mount to check for required params
     useEffect(() => {
-        if (!price || !description || !position || !duration || !whatsappLink) {
+        if (!price || !description || !position || !duration || !whatsappLink || !categoryId) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
@@ -110,6 +112,7 @@ function PaymentBannerComponent() {
                         description: description,
                         whatsappLink: whatsappLink,
                         position: position,
+                        categoryId: categoryId,
                         startDate: null, // To be set by admin on approval
                         expiryDate: null, // To be set by admin on approval
                         status: 'Pending',
@@ -171,6 +174,7 @@ function PaymentBannerComponent() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="p-4 bg-gray-50 border rounded-lg space-y-2">
+                        <div className="flex justify-between"><span className="text-muted-foreground">Category:</span> <span className="font-semibold">{categoryId}</span></div>
                         <div className="flex justify-between"><span className="text-muted-foreground">Position:</span> <span className="font-semibold">{position}</span></div>
                         <div className="flex justify-between"><span className="text-muted-foreground">Duration:</span> <span className="font-semibold">{duration?.replace('-', ' ')}</span></div>
                         <div className="flex justify-between text-lg"><span className="text-muted-foreground">Total:</span> <span className="font-bold text-primary">LKR {Number(price).toLocaleString()}</span></div>
@@ -229,3 +233,5 @@ export default function PaymentBannerPage() {
         </Suspense>
     )
 }
+
+    

@@ -40,6 +40,7 @@ const bannerDurations = [
 const bannerPositions = ['Top', 'Bottom', 'Left', 'Right'];
 const bannerAdSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters long'),
+  categoryId: z.string({ required_error: 'Please select a category' }),
   position: z.string({ required_error: 'Please select a banner position' }),
   duration: z.string({ required_error: 'Please select a duration' }),
   whatsappLink: z.string().url('Please enter a valid URL (e.g., https://wa.me/94...)'),
@@ -161,6 +162,7 @@ export default function PostAdPage() {
         duration: data.duration,
         price: calculatedPrice.toString(),
         whatsappLink: data.whatsappLink,
+        categoryId: data.categoryId,
     });
     
     if(data.image) {
@@ -274,6 +276,16 @@ export default function PostAdPage() {
                     <p className="text-sm text-muted-foreground my-4">Promote your business on our prime advertising spaces. Payment is required per banner.</p>
                     <Form {...bannerForm}>
                         <form onSubmit={bannerForm.handleSubmit(onBannerSubmit)} className="space-y-8">
+                             <FormField control={bannerForm.control} name="categoryId" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category for the banner" /></SelectTrigger></FormControl>
+                                    <SelectContent>{categories.map(cat => (<SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>))}</SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <FormField control={bannerForm.control} name="position" render={({ field }) => (
                                     <FormItem>
@@ -353,3 +365,5 @@ export default function PostAdPage() {
     </div>
   );
 }
+
+    
