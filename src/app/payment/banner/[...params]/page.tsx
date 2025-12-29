@@ -112,10 +112,11 @@ function PaymentBannerComponent() {
 
                     // 3. Create Banner document
                     const bannerRef = await addDoc(collection(firestore, 'banners'), {
+                        id: uuidv4(),
                         userId: user.uid,
                         imageUrl: bannerImageUrl,
                         description: description,
-                        whatsappLink: whatsappLink,
+                        whatsappNumber: whatsappNumber,
                         position: position,
                         categoryId: categoryId,
                         startDate: null, // To be set by admin on approval
@@ -126,6 +127,7 @@ function PaymentBannerComponent() {
         
                     // 4. Create Payment document
                     await addDoc(collection(firestore, 'payments'), {
+                        id: uuidv4(),
                         userId: user.uid,
                         paymentMethod: paymentMethod,
                         amount: Number(price),
@@ -186,20 +188,37 @@ function PaymentBannerComponent() {
                     </div>
 
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <h3 className="font-semibold">Bank Transfer Details</h3>
-                        <p className="text-sm text-muted-foreground">Please make a payment of LKR {Number(price).toLocaleString()} to the following account:</p>
-                        <ul className="mt-2 text-sm space-y-1">
-                            <li><strong>Bank:</strong> Commercial Bank</li>
-                            <li><strong>Account Name:</strong> AdZone Lanka (Pvt) Ltd</li>
-                            <li><strong>Account Number:</strong> 1234567890</li>
-                            <li><strong>Branch:</strong> Colombo</li>
-                        </ul>
-                         <p className="text-xs text-muted-foreground mt-2">Use your phone number as the reference.</p>
+                        <h3 className="font-semibold text-lg mb-3">Payment Instructions</h3>
+                        <p className="text-sm text-muted-foreground mb-4">Please make a payment of LKR {Number(price).toLocaleString()} using one of the methods below.</p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-semibold">1. Bank Transfer</h4>
+                                <ul className="mt-1 text-sm space-y-1 pl-4 list-disc list-inside">
+                                    <li><strong>Bank:</strong> Sampath Bank</li>
+                                    <li><strong>Account Name:</strong> J A Y S Kavinada</li>
+                                    <li><strong>Account Number:</strong> 121212121212</li>
+                                    <li><strong>Branch:</strong> Kalutara</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <h4 className="font-semibold">2. eZ Cash</h4>
+                                <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold">3. Genie</h4>
+                                <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                            </div>
+                        </div>
+
+                         <p className="text-xs text-muted-foreground mt-4">For bank transfers, please use your phone number as the reference. After payment, upload the slip below.</p>
                     </div>
 
                     <div className="space-y-4">
-                        <Label>Select Payment Method</Label>
-                        <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                        <Label>Select Payment Method Used</Label>
+                        <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="Bank Transfer" id="bank" />
                                 <Label htmlFor="bank">Bank Transfer</Label>
