@@ -20,7 +20,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Toaster } from '@/components/ui/toaster';
-import { SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 function AdminHeader() {
   const { isMobile } = useSidebar();
@@ -106,8 +105,6 @@ export default function AdminLayout({
           <div className="flex">
             <Sidebar>
               <SidebarContent>
-                <SheetTitle className="sr-only">Admin Menu</SheetTitle>
-                <SheetDescription className="sr-only">Navigation for the admin panel.</SheetDescription>
                 <SidebarGroup>
                   <SidebarMenu>
                     <SidebarMenuItem>

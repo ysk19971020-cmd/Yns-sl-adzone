@@ -7,7 +7,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { categories } from '@/lib/data';
 import { Logo } from '@/components/logo';
-import { useUser, useAuth } from '@/firebase';
+import { useUser, useAuth, useFirestore } from '@/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,6 @@ import {
 import { signOut } from 'firebase/auth';
 import { cn } from '@/lib/utils';
 import { doc, getDoc } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
 
 const PRIMARY_ADMIN_EMAIL = 'ysk19971020@gmail.com';
 
@@ -141,17 +140,19 @@ export function Header() {
               </Button>
             )
           ) : (
-             <Button variant="ghost" size="icon" disabled>
-                <User />
-             </Button>
+             null
           )}
 
-          {isClient && !isUserLoading ? (
-            <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
-              Post Ad
-            </Link>
+          {isClient ? (
+            !isUserLoading ? (
+              <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
+                Post Ad
+              </Link>
+            ) : (
+              <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
+            )
           ) : (
-             <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
+            <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
           )}
           
           <Sheet open={open} onOpenChange={setOpen}>
@@ -162,8 +163,8 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-                <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
+              <SheetTitle className="sr-only">Menu</SheetTitle>
+              <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
               <div className="p-6">
                 <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setOpen(false)}>
                   <Logo />
