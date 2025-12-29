@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { Menu, User, Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { categories } from '@/lib/data';
 import { Logo } from '@/components/logo';
@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { signOut } from 'firebase/auth';
+import { cn } from '@/lib/utils';
 
 const PRIMARY_ADMIN_EMAIL = 'ysk19971020@gmail.com';
 
@@ -97,16 +98,16 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-             <Button asChild variant="ghost" size="icon">
+             <Button  variant="ghost" size="icon">
                 <Link href="/login">
                     <User />
                 </Link>
             </Button>
           )}
 
-          <Button asChild className="bg-accent hover:bg-accent/90">
-            <Link href="/post-ad">Post Ad</Link>
-          </Button>
+          <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
+            Post Ad
+          </Link>
           
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -155,7 +156,7 @@ export function Header() {
                         Contact
                     </Link>
                    {isUserLoading ? null : user ? null : (
-                     <Button asChild variant="outline" onClick={() => setOpen(false)}>
+                     <Button  variant="outline" onClick={() => setOpen(false)}>
                         <Link href="/login">Login</Link>
                      </Button>
                    )}
