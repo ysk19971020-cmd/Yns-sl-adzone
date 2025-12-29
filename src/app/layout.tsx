@@ -10,7 +10,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SheetDescription, SheetTitle } from '@/components/ui/sheet';
+import { useEffect, useState } from 'react';
 
 
 const ptSans = PT_Sans({
@@ -30,6 +30,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const showBanners = pathname === '/';
 
 
@@ -45,7 +51,7 @@ export default function RootLayout({
       <body className={cn('min-h-screen bg-background font-body antialiased', ptSans.variable)}>
         <div className="relative flex min-h-screen flex-col">
           <FirebaseClientProvider>
-            <Header showBanners={showBanners} />
+             {isClient && <Header showBanners={showBanners} />}
             <main className="flex-1">{children}</main>
             <Footer />
             <Toaster />
