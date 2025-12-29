@@ -61,21 +61,26 @@ export default function AdminLayout({
     const checkAdminStatus = async () => {
       try {
         const userDocRef = doc(firestore, 'users', user.uid);
-        let userDoc = await getDoc(userDocRef);
+        const userDoc = await getDoc(userDocRef);
 
-        // If user doc doesn't exist, create it.
+        let userData = userDoc.data();
+        let currentUserIsAdmin = userData?.isAdmin === true;
+
+        // If user doc doesn't exist or is missing isAdmin, create/update it.
+        // Also handle bootstrapping the primary admin.
         if (!userDoc.exists()) {
-          await setDoc(userDocRef, { id: user.uid, email: user.email });
-          userDoc = await getDoc(userDocRef); // Re-fetch the doc
-        }
-
-        let currentUserIsAdmin = userDoc.data()?.isAdmin === true;
-
-        // Bootstrap primary admin if their email matches and they aren't admin yet
-        if (user.email === PRIMARY_ADMIN_EMAIL && !currentUserIsAdmin) {
-          console.log(`Bootstrapping primary admin: ${user.uid}`);
-          await setDoc(userDocRef, { isAdmin: true }, { merge: true });
-          currentUserIsAdmin = true;
+             const isPrimaryAdmin = user.email === PRIMARY_ADMIN_EMAIL;
+             const initialData = { 
+                id: user.uid, 
+                email: user.email, 
+                isAdmin: isPrimaryAdmin 
+             };
+             await setDoc(userDocRef, initialData);
+             currentUserIsAdmin = isPrimaryAdmin;
+        } else if (user.email === PRIMARY_ADMIN_EMAIL && !currentUserIsAdmin) {
+             // If the user exists but isn't admin and should be, elevate them.
+             await setDoc(userDocRef, { isAdmin: true }, { merge: true });
+             currentUserIsAdmin = true;
         }
         
         if (!currentUserIsAdmin) {
