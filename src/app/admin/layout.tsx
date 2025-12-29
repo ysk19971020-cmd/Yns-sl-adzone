@@ -67,6 +67,7 @@ export default function AdminLayout({
         const userDocRef = doc(firestore, 'users', user.uid);
         
         if (isAdminByEmail) {
+            // Ensure the user document is created/updated if they are the primary admin
             await setDoc(userDocRef, { isAdmin: true }, { merge: true });
         }
         
@@ -75,18 +76,24 @@ export default function AdminLayout({
         if (userDoc.exists() && userDoc.data().isAdmin === true) {
             currentUserIsAdmin = true;
         } else if (!isAdminByEmail) {
+             // If not primary admin and no admin flag in DB, redirect
              router.push('/');
              return;
         }
 
       } catch (error) {
         console.error("Error checking admin status:", error);
+        // On error, redirect to be safe
         router.push('/');
         return;
       }
       
       setIsAdmin(currentUserIsAdmin);
       setIsCheckingAdmin(false);
+
+      if (!currentUserIsAdmin) {
+        router.push('/');
+      }
     };
 
     checkAdminStatus();
@@ -115,52 +122,52 @@ export default function AdminLayout({
                 <SidebarGroup>
                   <SidebarMenu>
                     <SidebarMenuItem>
-                       <Link href="/admin" legacyBehavior passHref>
-                          <SidebarMenuButton isActive={isActive('/admin')} tooltip="Dashboard">
+                       <SidebarMenuButton asChild isActive={isActive('/admin')} tooltip="Dashboard">
+                          <Link href="/admin">
                               <LayoutDashboard />
                               Dashboard
-                          </SidebarMenuButton>
-                       </Link>
+                          </Link>
+                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href="/admin/payments" legacyBehavior passHref>
-                        <SidebarMenuButton isActive={isActive('/admin/payments')} tooltip="Payments">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/payments')} tooltip="Payments">
+                        <Link href="/admin/payments">
                           <DollarSign />
                           Payments
-                        </SidebarMenuButton>
-                      </Link>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                      <SidebarMenuItem>
-                      <Link href="/admin/ads" legacyBehavior passHref>
-                        <SidebarMenuButton isActive={isActive('/admin/ads')} tooltip="Ads">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/ads')} tooltip="Ads">
+                        <Link href="/admin/ads">
                           <ShoppingBag />
                            Ads
-                        </SidebarMenuButton>
-                      </Link>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href="/admin/banners" legacyBehavior passHref>
-                        <SidebarMenuButton isActive={isActive('/admin/banners')} tooltip="Banners">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/banners')} tooltip="Banners">
+                        <Link href="/admin/banners">
                           <ImageIcon />
                            Banners
-                        </SidebarMenuButton>
-                      </Link>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <Link href="/admin/memberships" legacyBehavior passHref>
-                        <SidebarMenuButton isActive={isActive('/admin/memberships')} tooltip="Memberships">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/memberships')} tooltip="Memberships">
+                        <Link href="/admin/memberships">
                           <Star />
                            Memberships
-                        </SidebarMenuButton>
-                      </Link>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                      <SidebarMenuItem>
-                       <Link href="/admin/users" legacyBehavior passHref>
-                        <SidebarMenuButton isActive={isActive('/admin/users')} tooltip="Users">
+                       <SidebarMenuButton asChild isActive={isActive('/admin/users')} tooltip="Users">
+                         <Link href="/admin/users">
                           <Users />
                           Users
-                        </SidebarMenuButton>
-                       </Link>
+                        </Link>
+                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroup>
