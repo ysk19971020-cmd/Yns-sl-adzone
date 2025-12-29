@@ -30,7 +30,6 @@ export function Header() {
   const firestore = useFirestore();
   const [isAdmin, setIsAdmin] = React.useState(false);
   
-  // State to prevent hydration mismatch
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
@@ -60,10 +59,10 @@ export function Header() {
         setIsAdmin(false);
       }
     };
-    if (!isUserLoading) {
+    if (isClient && !isUserLoading) {
       checkAdmin();
     }
-  }, [user, isUserLoading, firestore]);
+  }, [user, isUserLoading, firestore, isClient]);
 
   const handleSignOut = () => {
     if(auth) {

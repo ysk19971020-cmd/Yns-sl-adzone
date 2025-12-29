@@ -20,6 +20,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Toaster } from '@/components/ui/toaster';
+import { SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 function AdminHeader() {
   const { isMobile } = useSidebar();
@@ -60,32 +61,18 @@ export default function AdminLayout({
     }
 
     const checkAdminStatus = async () => {
-      const isAdminByEmail = user.email === PRIMARY_ADMIN_EMAIL;
-      let currentUserIsAdmin = isAdminByEmail;
+      let currentUserIsAdmin = false;
+      const userDocRef = doc(firestore, 'users', user.uid);
 
-      try {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        
-        if (isAdminByEmail) {
-            // Ensure the user document is created/updated if they are the primary admin
-            await setDoc(userDocRef, { isAdmin: true }, { merge: true });
-        }
-        
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists() && userDoc.data().isAdmin === true) {
+      if (user.email === PRIMARY_ADMIN_EMAIL) {
+        currentUserIsAdmin = true;
+        // Ensure the admin flag is set in Firestore for the primary admin
+        await setDoc(userDocRef, { isAdmin: true }, { merge: true });
+      } else {
+         const userDoc = await getDoc(userDocRef);
+         if (userDoc.exists() && userDoc.data().isAdmin === true) {
             currentUserIsAdmin = true;
-        } else if (!isAdminByEmail) {
-             // If not primary admin and no admin flag in DB, redirect
-             router.push('/');
-             return;
-        }
-
-      } catch (error) {
-        console.error("Error checking admin status:", error);
-        // On error, redirect to be safe
-        router.push('/');
-        return;
+         }
       }
       
       setIsAdmin(currentUserIsAdmin);
@@ -119,6 +106,8 @@ export default function AdminLayout({
           <div className="flex">
             <Sidebar>
               <SidebarContent>
+                <SheetTitle className="sr-only">Admin Menu</SheetTitle>
+                <SheetDescription className="sr-only">Navigation for the admin panel.</SheetDescription>
                 <SidebarGroup>
                   <SidebarMenu>
                     <SidebarMenuItem>
