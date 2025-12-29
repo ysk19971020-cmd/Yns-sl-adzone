@@ -29,7 +29,7 @@ function PaymentBannerComponent() {
     const position = searchParams.get('position');
     const duration = searchParams.get('duration');
     const price = searchParams.get('price');
-    const whatsappLink = searchParams.get('whatsappLink');
+    const whatsappNumber = searchParams.get('whatsappNumber');
     const categoryId = searchParams.get('categoryId');
 
 
@@ -41,7 +41,7 @@ function PaymentBannerComponent() {
 
     // This effect should run only once on mount to check for required params
     useEffect(() => {
-        if (!price || !description || !position || !duration || !whatsappLink || !categoryId) {
+        if (!price || !description || !position || !duration || !whatsappNumber || !categoryId) {
             toast({
                 variant: 'destructive',
                 title: 'Error',
@@ -104,7 +104,12 @@ function PaymentBannerComponent() {
                     const slipDataUrl = e.target?.result as string;
                     await uploadString(slipStorageRef, slipDataUrl, 'data_url');
                     const paymentSlipUrl = await getDownloadURL(slipStorageRef);
-        
+                    
+                    // Create WhatsApp link from number
+                    const cleanedNumber = whatsappNumber?.replace(/[^0-9]/g, '');
+                    const finalNumber = cleanedNumber?.startsWith('0') ? '94' + cleanedNumber.substring(1) : cleanedNumber;
+                    const whatsappLink = `https://wa.me/${finalNumber}`;
+
                     // 3. Create Banner document
                     const bannerRef = await addDoc(collection(firestore, 'banners'), {
                         userId: user.uid,
@@ -233,5 +238,3 @@ export default function PaymentBannerPage() {
         </Suspense>
     )
 }
-
-    

@@ -43,7 +43,7 @@ const bannerAdSchema = z.object({
   categoryId: z.string({ required_error: 'Please select a category' }),
   position: z.string({ required_error: 'Please select a banner position' }),
   duration: z.string({ required_error: 'Please select a duration' }),
-  whatsappLink: z.string().url('Please enter a valid URL (e.g., https://wa.me/94...)'),
+  whatsappNumber: z.string().min(10, 'Please enter a valid phone number'),
   image: z.instanceof(File).refine(file => file.size > 0, 'Please upload an image'),
 });
 type BannerAdFormValues = z.infer<typeof bannerAdSchema>;
@@ -161,7 +161,7 @@ export default function PostAdPage() {
         position: data.position,
         duration: data.duration,
         price: calculatedPrice.toString(),
-        whatsappLink: data.whatsappLink,
+        whatsappNumber: data.whatsappNumber,
         categoryId: data.categoryId,
     });
     
@@ -309,10 +309,10 @@ export default function PostAdPage() {
                                 )}/>
                             </div>
                             
-                            <FormField control={bannerForm.control} name="whatsappLink" render={({ field }) => (
+                            <FormField control={bannerForm.control} name="whatsappNumber" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>WhatsApp Link</FormLabel>
-                                    <FormControl><Input placeholder="e.g., https://wa.me/94771234567" {...field} /></FormControl>
+                                    <FormLabel>WhatsApp Number</FormLabel>
+                                    <FormControl><Input placeholder="e.g., 0771234567" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -365,5 +365,3 @@ export default function PostAdPage() {
     </div>
   );
 }
-
-    
