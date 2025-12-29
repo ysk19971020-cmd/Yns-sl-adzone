@@ -26,8 +26,8 @@ export function Header() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   
-  // The isAdmin state is determined by checking the user's email.
-  const isAdmin = !isUserLoading && user?.email === PRIMARY_ADMIN_EMAIL;
+  // This state is derived from the user object, which is now stable after the loading state is handled.
+  const isAdmin = user?.email === PRIMARY_ADMIN_EMAIL;
 
   const handleSignOut = () => {
     if(auth) {
@@ -73,7 +73,11 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {isUserLoading ? null : user ? (
+          {isUserLoading ? (
+             <Button variant="ghost" size="icon" disabled>
+                <User />
+             </Button>
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -98,16 +102,20 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-             <Button  variant="ghost" size="icon">
+             <Button asChild variant="ghost" size="icon">
                 <Link href="/login">
                     <User />
                 </Link>
             </Button>
           )}
 
-          <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
-            Post Ad
-          </Link>
+          {isUserLoading ? (
+            <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
+          ) : (
+            <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
+              Post Ad
+            </Link>
+          )}
           
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -156,7 +164,7 @@ export function Header() {
                         Contact
                     </Link>
                    {isUserLoading ? null : user ? null : (
-                     <Button  variant="outline" onClick={() => setOpen(false)}>
+                     <Button asChild variant="outline" onClick={() => setOpen(false)}>
                         <Link href="/login">Login</Link>
                      </Button>
                    )}
