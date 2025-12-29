@@ -2,7 +2,7 @@ import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { categories, ads } from '@/lib/data';
-import { Search, MapPin, Megaphone } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import type { Icon as LucideIcon } from 'lucide-react';
 
@@ -62,20 +62,6 @@ export default function Home() {
               );
             })}
           </div>
-        </div>
-      </section>
-
-      <section className="w-full py-8">
-        <div className="container mx-auto px-4">
-          <Link href="/post-ad">
-            <div className="p-6 md:p-8 bg-accent/20 border-2 border-dashed border-accent rounded-lg flex flex-col md:flex-row items-center justify-center gap-4 text-center hover:bg-accent/30 transition-colors">
-              <Megaphone className="w-10 h-10 text-accent" />
-              <div>
-                <h3 className="text-xl md:text-2xl font-bold text-accent-foreground">ඔබේ දැන්වීම මෙහි පල කරන්න</h3>
-                <p className="text-muted-foreground">Post Your Ad Here & Reach Thousands of Customers</p>
-              </div>
-            </div>
-          </Link>
         </div>
       </section>
 
