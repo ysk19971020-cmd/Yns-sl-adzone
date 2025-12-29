@@ -107,11 +107,11 @@
   }
 
   /* Adjust main content padding to not be obscured by banners */
-  main {
-    @apply pl-40 pr-40 pt-20;
+  .main-with-banners {
+    @apply pt-20 pl-40 pr-40;
   }
   
-  footer {
+  .footer-with-banners {
     @apply pb-20 pl-40 pr-40;
   }
   
@@ -120,10 +120,10 @@
     .banner-left, .banner-right {
       @apply hidden;
     }
-    main, footer {
+    .main-with-banners, .footer-with-banners {
       @apply pl-4 pr-4;
     }
-    main {
+    .main-with-banners {
        @apply pt-20;
     }
   }

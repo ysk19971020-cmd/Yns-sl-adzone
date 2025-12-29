@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
+import { cn } from '@/lib/utils';
 
-export function Footer() {
+export function Footer({ className }: { className?: string }) {
   return (
-    <footer className="w-full border-t bg-card text-card-foreground">
+    <footer className={cn("w-full border-t bg-card text-card-foreground", className)}>
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>

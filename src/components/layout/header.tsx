@@ -22,7 +22,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 const PRIMARY_ADMIN_EMAIL = 'ysk19971020@gmail.com';
 
-export function Header() {
+export function Header({ showBanners }: { showBanners: boolean }) {
   const [open, setOpen] = React.useState(false);
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
@@ -70,7 +70,10 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-20 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pl-40 pr-40">
+    <header className={cn(
+      "sticky z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+       showBanners ? "top-20 pl-40 pr-40" : "top-0"
+      )}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <Logo />
@@ -152,7 +155,7 @@ export function Header() {
               <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
             )
           ) : (
-            <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
+             <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
           )}
           
           <Sheet open={open} onOpenChange={setOpen}>
@@ -163,8 +166,8 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <SheetTitle className="sr-only">Menu</SheetTitle>
-              <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
+               <SheetTitle className="sr-only">Menu</SheetTitle>
+               <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
               <div className="p-6">
                 <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setOpen(false)}>
                   <Logo />
