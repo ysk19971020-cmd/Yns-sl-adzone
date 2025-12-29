@@ -108,11 +108,10 @@
 
   /* Adjust main content padding to not be obscured by banners */
   .main-with-banners {
-    @apply pt-20 pl-40 pr-40;
-  }
-  
-  .footer-with-banners {
-    @apply pb-20 pl-40 pr-40;
+    padding-top: theme(spacing.20);
+    padding-bottom: theme(spacing.20);
+    padding-left: theme(spacing.40);
+    padding-right: theme(spacing.40);
   }
   
   /* On smaller screens, hide side banners and adjust padding */
@@ -120,11 +119,9 @@
     .banner-left, .banner-right {
       @apply hidden;
     }
-    .main-with-banners, .footer-with-banners {
-      @apply pl-4 pr-4;
-    }
     .main-with-banners {
-       @apply pt-20;
+      padding-left: theme(spacing.4);
+      padding-right: theme(spacing.4);
     }
   }
 }

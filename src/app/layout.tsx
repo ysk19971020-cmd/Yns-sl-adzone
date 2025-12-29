@@ -30,7 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const showBanners = pathname !== '/category/vehicles';
+  // Banner logic is now handled by individual pages, not the root layout.
+  const isVehiclePage = pathname === '/category/vehicles';
+
 
   return (
     <html lang="en" className="light" suppressHydrationWarning>
@@ -44,50 +46,9 @@ export default function RootLayout({
       <body className={cn('min-h-screen bg-background font-body antialiased', ptSans.variable)}>
         <div className="relative flex min-h-screen flex-col">
           <FirebaseClientProvider>
-            {/* Top Banner */}
-            {showBanners && (
-              <div className="banner banner-top">
-                <Link href="/post-ad">
-                  <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
-                </Link>
-              </div>
-            )}
-
-
-            {/* Left Banner */}
-             {showBanners && (
-              <div className="banner banner-left">
-                <Link href="/post-ad">
-                  <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
-                </Link>
-              </div>
-            )}
-            
-            <Header showBanners={showBanners}/>
-            <main className={cn(
-              "flex-1",
-              showBanners && "main-with-banners"
-            )}>{children}</main>
-            <Footer className={cn(showBanners && "footer-with-banners")} />
-
-            {/* Right Banner */}
-            {showBanners && (
-              <div className="banner banner-right">
-                <Link href="/post-ad">
-                  <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
-                </Link>
-              </div>
-            )}
-
-            {/* Bottom Banner */}
-            {showBanners && (
-               <div className="banner banner-bottom">
-                <Link href="/post-ad">
-                  <span className="add-your-ad">ඔබේ දැන්වීම එක් කරන්න</span>
-                </Link>
-              </div>
-            )}
-
+            <Header showBanners={!isVehiclePage} />
+            <main className="flex-1">{children}</main>
+            <Footer />
             <Toaster />
           </FirebaseClientProvider>
         </div>
