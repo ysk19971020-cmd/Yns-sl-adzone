@@ -13,7 +13,8 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid'; 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function PaymentPage() {
     const { plan } = useParams();
@@ -163,6 +164,14 @@ export default function PaymentPage() {
                                  <p className="text-xs text-muted-foreground mt-4">For bank transfers, please use your phone number as the reference. After payment, upload the slip below.</p>
                             </div>
 
+                            <Alert className="mt-6">
+                                <Info className="h-4 w-4" />
+                                <AlertTitle>Important Note</AlertTitle>
+                                <AlertDescription>
+                                This is a manual verification process. Your membership plan will be activated after our admin team reviews and approves your payment.
+                                </AlertDescription>
+                            </Alert>
+
                             <div className="space-y-4 mt-6">
                                 <Label>Select Payment Method Used</Label>
                                 <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
@@ -223,5 +232,3 @@ export default function PaymentPage() {
         </div>
     );
 }
-
-    
