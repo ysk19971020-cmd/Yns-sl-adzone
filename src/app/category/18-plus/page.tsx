@@ -9,29 +9,29 @@ export default function EighteenPlusCategoryPage() {
     <>
       {/* 18+ Page Banners */}
       <div className="banner banner-top">
-        <Link href="/post-ad"><span className="add-your-ad">Post Your 18+ Ad Here!</span></Link>
+        <Link href="/post-ad"><span className="add-your-ad">ඔබේ 18+ දැන්වීම මෙහි පළ කරන්න!</span></Link>
       </div>
       <div className="banner banner-left">
-        <Link href="/post-ad"><span className="add-your-ad">18+ Ads</span></Link>
+        <Link href="/post-ad"><span className="add-your-ad">18+ දැන්වීම්</span></Link>
       </div>
       <div className="banner banner-right">
-        <Link href="/post-ad"><span className="add-your-ad">18+ Ads</span></Link>
+        <Link href="/post-ad"><span className="add-your-ad">18+ දැන්වීම්</span></Link>
       </div>
       <div className="banner banner-bottom">
-        <Link href="/post-ad"><span className="add-your-ad">Post Your 18+ Ad Here!</span></Link>
+        <Link href="/post-ad"><span className="add-your-ad">ඔබේ 18+ දැන්වීම මෙහි පළ කරන්න!</span></Link>
       </div>
 
       <div className="container mx-auto px-4 py-12 main-with-banners">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">18+ Ads</h1>
+          <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">18+ දැන්වීම්</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Browse through our 18+ categories.
+            අපගේ 18+ ප්‍රවර්ග හරහා περιηγηθείτε.
           </p>
         </div>
         
         {/* Mid-page banner */}
         <div className="my-8 p-6 bg-accent/20 rounded-lg text-center">
-            <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">Post Your 18+ Ads Here!</Link></h3>
+            <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">ඔබේ 18+ දැන්වීම් මෙහි පළ කරන්න!</Link></h3>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">

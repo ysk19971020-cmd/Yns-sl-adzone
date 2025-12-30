@@ -30,17 +30,17 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     if (!auth) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Auth service not ready.' });
+      toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'සත්‍යාපන සේවාව සූදානම් නැත.' });
       return;
     }
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: 'Success', description: 'Logged in successfully.' });
+      toast({ title: 'සාර්ථකයි', description: 'සාර්ථකව පිවිසිනි.' });
       router.push('/');
     } catch (error: any) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Login Failed', description: error.message });
+      toast({ variant: 'destructive', title: 'පිවිසීම අසාර්ථකයි', description: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +48,7 @@ export default function LoginPage() {
 
   const handleSignUp = async () => {
     if (!auth || !firestore) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Auth or Firestore service not ready.' });
+      toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'සත්‍යාපන හෝ Firestore සේවාව සූදානම් නැත.' });
       return;
     }
     setIsLoading(true);
@@ -63,11 +63,11 @@ export default function LoginPage() {
         isAdmin: false, // Default isAdmin to false
       });
 
-      toast({ title: 'Success', description: 'Account created successfully. You are now logged in.' });
+      toast({ title: 'සාර්ථකයි', description: 'ගිණුම සාර්ථකව නිර්මාණය කරන ලදී. ඔබ දැන් පිවිස ඇත.' });
       router.push('/');
     } catch (error: any) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Sign Up Failed', description: error.message });
+      toast({ variant: 'destructive', title: 'ලියාපදිංචි වීම අසාර්ථකයි', description: error.message });
     } finally {
       setIsLoading(false);
     }
@@ -83,61 +83,61 @@ export default function LoginPage() {
   }
 
   if (isUserLoading || (!isUserLoading && user)) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen">පූරණය වෙමින් පවතී...</div>;
   }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)] bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>{activeTab === 'login' ? 'Login' : 'Sign Up'}</CardTitle>
+          <CardTitle>{activeTab === 'login' ? 'පිවිසෙන්න' : 'ලියාපදිංචි වන්න'}</CardTitle>
           <CardDescription>
-            Enter your email and password to {activeTab}.
+            පිවිසීමට ඔබගේ ඊමේල් සහ මුරපදය ඇතුළත් කරන්න.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="login">පිවිසෙන්න</TabsTrigger>
+              <TabsTrigger value="signup">ලියාපදිංචි වන්න</TabsTrigger>
             </TabsList>
             <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                <TabsContent value="login" className="m-0 p-0 space-y-4">
                     <Input
                         type="email"
-                        placeholder="Email"
+                        placeholder="ඊමේල්"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
                     />
                     <Input
                         type="password"
-                        placeholder="Password"
+                        placeholder="මුරපදය"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={isLoading}
                     />
                     <Button type="submit" disabled={isLoading || !email || !password} className="w-full">
-                        {isLoading ? 'Loading...' : 'Login'}
+                        {isLoading ? 'පූරණය වෙමින්...' : 'පිවිසෙන්න'}
                     </Button>
                 </TabsContent>
                 <TabsContent value="signup" className="m-0 p-0 space-y-4">
                      <Input
                         type="email"
-                        placeholder="Email"
+                        placeholder="ඊමේල්"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={isLoading}
                     />
                     <Input
                         type="password"
-                        placeholder="Password"
+                        placeholder="මුරපදය"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         disabled={isLoading}
                     />
                     <Button type="submit" disabled={isLoading || !email || !password} className="w-full">
-                        {isLoading ? 'Creating Account...' : 'Sign Up'}
+                        {isLoading ? 'ගිණුම නිර්මාණය කරමින්...' : 'ලියාපදිංචි වන්න'}
                     </Button>
                 </TabsContent>
             </form>

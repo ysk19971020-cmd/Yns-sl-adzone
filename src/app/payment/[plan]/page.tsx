@@ -31,7 +31,7 @@ export default function PaymentPage() {
     const selectedPlan = pricingPlans.find(p => p.id === plan);
 
     if (isUserLoading) {
-        return <div>Loading...</div>;
+        return <div>පූරණය වෙමින්...</div>;
     }
 
     if (!user) {
@@ -40,7 +40,7 @@ export default function PaymentPage() {
     }
 
     if (!selectedPlan) {
-        return <div>Invalid plan selected.</div>;
+        return <div>තෝරාගත් සැලැස්ම වැරදියි.</div>;
     }
     
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,8 +53,8 @@ export default function PaymentPage() {
         if (!paymentSlip) {
             toast({
                 variant: 'destructive',
-                title: 'Error',
-                description: 'Please upload your payment slip.',
+                title: 'දෝෂයකි',
+                description: 'කරුණාකර ඔබගේ ගෙවීම් පත්‍රිකාව උඩුගත කරන්න.',
             });
             return;
         }
@@ -62,8 +62,8 @@ export default function PaymentPage() {
         if (!firestore) {
             toast({
                 variant: 'destructive',
-                title: 'Error',
-                description: 'Database not available. Please try again later.',
+                title: 'දෝෂයකි',
+                description: 'දත්ත සමුදාය නොමැත. කරුණාකර පසුව නැවත උත්සාහ කරන්න.',
             });
             return;
         }
@@ -94,8 +94,8 @@ export default function PaymentPage() {
             });
 
             toast({
-                title: 'Payment Submitted',
-                description: 'Your payment is being reviewed. Your plan will be activated upon approval.',
+                title: 'ගෙවීම ඉදිරිපත් කරන ලදී',
+                description: 'ඔබගේ ගෙවීම සමාලෝචනය වෙමින් පවතී. අනුමත කිරීමෙන් පසු ඔබගේ සැලැස්ම සක්‍රිය වනු ඇත.',
             });
 
             router.push('/');
@@ -104,8 +104,8 @@ export default function PaymentPage() {
             console.error("Payment submission error: ", error);
             toast({
                 variant: 'destructive',
-                title: 'Submission Failed',
-                description: error.message || 'There was an error submitting your payment.',
+                title: 'ඉදිරිපත් කිරීම අසාර්ථක විය',
+                description: error.message || 'ඔබගේ ගෙවීම ඉදිරිපත් කිරීමේදී දෝෂයක් ඇතිවිය.',
             });
         } finally {
             setIsLoading(false);
@@ -115,8 +115,8 @@ export default function PaymentPage() {
     const handleCardSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         toast({
-            title: "Coming Soon!",
-            description: "Card payments are not yet available. Please use a manual payment method for now.",
+            title: "ළඟදීම!",
+            description: "කාඩ්පත් ගෙවීම් තවමත් නොමැත. කරුණාකර දැනට අතින් ගෙවීමේ ක්‍රමයක් භාවිතා කරන්න.",
             variant: "default",
         });
     }
@@ -125,59 +125,59 @@ export default function PaymentPage() {
         <div className="container mx-auto max-w-2xl py-12">
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-3xl">Complete Your Payment</CardTitle>
-                    <CardDescription>You have selected the <span className="font-bold text-primary">{selectedPlan.name}</span> plan.</CardDescription>
+                    <CardTitle className="text-3xl">ඔබගේ ගෙවීම සම්පූර්ණ කරන්න</CardTitle>
+                    <CardDescription>ඔබ <span className="font-bold text-primary">{selectedPlan.name}</span> සැලැස්ම තෝරාගෙන ඇත.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="manual">Bank/Manual Transfer</TabsTrigger>
-                            <TabsTrigger value="card">Card Payment</TabsTrigger>
+                            <TabsTrigger value="manual">බැංකු/අතින් මාරු කිරීම</TabsTrigger>
+                            <TabsTrigger value="card">කාඩ්පත් ගෙවීම</TabsTrigger>
                         </TabsList>
                         <TabsContent value="manual" className="pt-6">
                             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <h3 className="font-semibold text-lg mb-3">Payment Instructions</h3>
-                                <p className="text-sm text-muted-foreground mb-4">Please make a payment of LKR {selectedPlan.price.toLocaleString()} using one of the methods below.</p>
+                                <h3 className="font-semibold text-lg mb-3">ගෙවීම් උපදෙස්</h3>
+                                <p className="text-sm text-muted-foreground mb-4">කරුණාකර පහත ක්‍රම වලින් එකක් භාවිතා කර රු. {selectedPlan.price.toLocaleString()} ක ගෙවීමක් කරන්න.</p>
                                 
                                 <div className="space-y-4">
                                     <div>
-                                        <h4 className="font-semibold">1. Bank Transfer</h4>
+                                        <h4 className="font-semibold">1. බැංකු මාරු කිරීම</h4>
                                         <ul className="mt-1 text-sm space-y-1 pl-4 list-disc list-inside">
-                                            <li><strong>Bank:</strong> Sampath Bank</li>
-                                            <li><strong>Account Name:</strong> J A Y S Kavinada</li>
-                                            <li><strong>Account Number:</strong> 121212121212</li>
-                                            <li><strong>Branch:</strong> Kalutara</li>
+                                            <li><strong>බැංකුව:</strong> සම්පත් බැංකුව</li>
+                                            <li><strong>ගිණුමේ නම:</strong> J A Y S Kavinada</li>
+                                            <li><strong>ගිණුම් අංකය:</strong> 121212121212</li>
+                                            <li><strong>ශාඛාව:</strong> කළුතර</li>
                                         </ul>
                                     </div>
                                     
                                     <div>
                                         <h4 className="font-semibold">2. eZ Cash</h4>
-                                        <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                                        <p className="mt-1 text-sm">අංකයට යවන්න: <strong>0771248610</strong></p>
                                     </div>
 
                                     <div>
                                         <h4 className="font-semibold">3. Genie</h4>
-                                        <p className="mt-1 text-sm">Send to number: <strong>0771248610</strong></p>
+                                        <p className="mt-1 text-sm">අංකයට යවන්න: <strong>0771248610</strong></p>
                                     </div>
                                 </div>
 
-                                 <p className="text-xs text-muted-foreground mt-4">For bank transfers, please use your phone number as the reference. After payment, upload the slip below.</p>
+                                 <p className="text-xs text-muted-foreground mt-4">බැංකු මාරු කිරීම් සඳහා, කරුණාකර ඔබගේ දුරකථන අංකය විමර්ශන අංකය ලෙස භාවිතා කරන්න. ගෙවීමෙන් පසු, පහතින් පත්‍රිකාව උඩුගත කරන්න.</p>
                             </div>
 
                             <Alert className="mt-6">
                                 <Info className="h-4 w-4" />
-                                <AlertTitle>Important Note</AlertTitle>
+                                <AlertTitle>වැදගත් සටහන</AlertTitle>
                                 <AlertDescription>
-                                This is a manual verification process. Your membership plan will be activated after our admin team reviews and approves your payment.
+                                මෙය අතින් තහවුරු කිරීමේ ක්‍රියාවලියකි. අපගේ පරිපාලක කණ්ඩායම ඔබගේ ගෙවීම සමාලෝචනය කර අනුමත කිරීමෙන් පසු ඔබගේ සාමාජික සැලැස්ම සක්‍රිය වනු ඇත.
                                 </AlertDescription>
                             </Alert>
 
                             <div className="space-y-4 mt-6">
-                                <Label>Select Payment Method Used</Label>
+                                <Label>භාවිතා කළ ගෙවීම් ක්‍රමය තෝරන්න</Label>
                                 <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
                                     <div className="flex items-center space-x-2">
                                         <RadioGroupItem value="Bank Transfer" id="bank" />
-                                        <Label htmlFor="bank">Bank Transfer</Label>
+                                        <Label htmlFor="bank">බැංකු මාරු කිරීම</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <RadioGroupItem value="eZ Cash" id="ezcash" />
@@ -191,28 +191,28 @@ export default function PaymentPage() {
                             </div>
 
                             <div className="space-y-2 mt-6">
-                                <Label htmlFor="payment-slip">Upload Payment Slip</Label>
+                                <Label htmlFor="payment-slip">ගෙවීම් පත්‍රිකාව උඩුගත කරන්න</Label>
                                 <Input id="payment-slip" type="file" accept="image/*" onChange={handleFileChange} />
-                                <p className="text-xs text-muted-foreground">Please upload a clear image of your bank slip or transaction receipt.</p>
+                                <p className="text-xs text-muted-foreground">කරුණාකර ඔබගේ බැංකු පත්‍රිකාවේ හෝ ගනුදෙනු රිසිට්පතේ පැහැදිලි ඡායාරූපයක් උඩුගත කරන්න.</p>
                             </div>
 
                             <Button onClick={handleManualSubmit} disabled={isLoading || !paymentSlip} className="w-full mt-6" size="lg">
-                                {isLoading ? 'Submitting...' : `Submit Payment of LKR ${selectedPlan.price.toLocaleString()}`}
+                                {isLoading ? 'ඉදිරිපත් කරමින්...' : `රු. ${selectedPlan.price.toLocaleString()} ගෙවීම ඉදිරිපත් කරන්න`}
                             </Button>
                         </TabsContent>
                         <TabsContent value="card" className="pt-6">
                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                                <h3 className="font-semibold text-lg">Coming Soon!</h3>
-                                <p className="text-sm text-muted-foreground mt-1">Online card payments will be available shortly.</p>
+                                <h3 className="font-semibold text-lg">ළඟදීම!</h3>
+                                <p className="text-sm text-muted-foreground mt-1">මාර්ගගත කාඩ්පත් ගෙවීම් ટૂંક સમયમાં ઉપલબ્ધ થશે.</p>
                            </div>
                            <form onSubmit={handleCardSubmit} className="space-y-4 mt-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="card-number">Card Number</Label>
+                                    <Label htmlFor="card-number">කාඩ්පත් අංකය</Label>
                                     <Input id="card-number" placeholder="•••• •••• •••• ••••" disabled />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="expiry-date">Expiry Date</Label>
+                                        <Label htmlFor="expiry-date">කල් ඉකුත්වන දිනය</Label>
                                         <Input id="expiry-date" placeholder="MM / YY" disabled />
                                     </div>
                                     <div className="space-y-2">
@@ -222,7 +222,7 @@ export default function PaymentPage() {
                                 </div>
                                 <Button type="submit" className="w-full" size="lg" disabled>
                                     <CreditCard className="mr-2 h-4 w-4" />
-                                    Pay LKR {selectedPlan.price.toLocaleString()} Securely
+                                    රු. {selectedPlan.price.toLocaleString()} ආරක්ෂිතව ගෙවන්න
                                 </Button>
                            </form>
                         </TabsContent>

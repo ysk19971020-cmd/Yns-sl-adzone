@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,8 +28,9 @@ export default function Home() {
   
   const { data: allAds, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
 
-  const filteredAds = useMemoFirebase(() => {
-    return (allAds || [])
+  const filteredAds = useMemo(() => {
+    if (!allAds) return [];
+    return allAds
       .filter(ad => {
         const titleMatch = searchTerm.toLowerCase() 
           ? ad.title.toLowerCase().includes(searchTerm.toLowerCase()) 
@@ -63,17 +64,17 @@ export default function Home() {
         <section className="w-full bg-card py-16 md:py-24 lg:py-32">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold text-foreground">
-              Find Anything in Sri Lanka
+              ශ්‍රී ලංකාවේ ඕනෑම දෙයක් සොයන්න
             </h1>
             <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Your one-stop marketplace for vehicles, properties, electronics, and more.
+              වාහන, දේපළ, ඉලෙක්ට්‍රොනික උපකරණ සහ තවත් දේ සඳහා ඔබේ එකම වෙළඳපොළ.
             </p>
             <div className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4 p-4 bg-background rounded-lg shadow-inner">
               <div className="relative flex-grow w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="What are you looking for?"
+                  placeholder="ඔබ සොයන්නේ කුමක්ද?"
                   className="pl-10 w-full"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -83,15 +84,15 @@ export default function Home() {
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Location (e.g., Colombo)"
+                  placeholder="ස්ථානය (උදා: කොළඹ)"
                   className="pl-10 w-full"
                   value={locationTerm}
                   onChange={(e) => setLocationTerm(e.target.value)}
                 />
               </div>
-              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90" onClick={() => { /* Search logic is now based on state change */ }}>
+              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90">
                 <Search className="mr-2" />
-                Search
+                සොයන්න
               </Button>
             </div>
           </div>
@@ -100,7 +101,7 @@ export default function Home() {
         <section className="w-full py-12 md:py-16">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center font-headline mb-8">
-              Browse Categories
+              ප්‍රවර්ග පිරික්සන්න
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {categories.map((category) => {
@@ -118,7 +119,7 @@ export default function Home() {
               })}
             </div>
              <div className="my-8 p-6 bg-accent/20 rounded-lg text-center mt-12">
-               <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">Post Your Ad Here!</Link></h3>
+               <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">ඔබේ දැන්වීම මෙහි පළ කරන්න!</Link></h3>
             </div>
           </div>
         </section>
@@ -147,13 +148,13 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="text-center mt-12">
-                  <Button variant="outline" size="lg" disabled>View More Ads</Button>
+                  <Button variant="outline" size="lg" disabled>තවත් දැන්වීම් බලන්න</Button>
                 </div>
               </>
             ) : (
              !isLoadingAds && (
                 <div className="text-center text-muted-foreground py-16">
-                  <p>No ads found for your search.</p>
+                  <p>ඔබගේ සෙවුමට ගැලපෙන දැන්වීම් හමු නොවීය.</p>
                 </div>
               )
             )}

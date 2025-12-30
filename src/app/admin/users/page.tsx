@@ -34,8 +34,8 @@ export default function UsersPage() {
         console.error("Error fetching users:", error);
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'Could not fetch users.',
+          title: 'දෝෂයකි',
+          description: 'පරිශීලකයින් ලබා ගැනීමට නොහැකි විය.',
         });
       } finally {
         setIsLoading(false);
@@ -58,15 +58,15 @@ export default function UsersPage() {
       await setDoc(userDocRef, { isAdmin: newIsAdmin }, { merge: true });
       
       toast({
-        title: 'Success',
-        description: `User admin status updated.`,
+        title: 'සාර්ථකයි',
+        description: `පරිශීලක පරිපාලක තත්ත්වය යාවත්කාලීන කරන ලදී.`,
       });
     } catch (error) {
       console.error("Error updating admin status:", error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to update admin status.',
+        title: 'දෝෂයකි',
+        description: 'පරිපාලක තත්ත්වය යාවත්කාලීන කිරීමට අසමත් විය.',
       });
       // Revert UI change on failure
       setUsers(currentUsers =>
@@ -78,22 +78,22 @@ export default function UsersPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">User Management</h1>
+        <h1 className="text-lg font-semibold md:text-2xl">පරිශීලක කළමනාකරණය</h1>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Registered Users</CardTitle>
+          <CardTitle>ලියාපදිංචි පරිශීලකයින්</CardTitle>
           <CardDescription>
-            Manage user roles and permissions. Toggle the switch to grant or revoke admin privileges.
+            පරිශීලක භූමිකාවන් සහ අවසරයන් කළමනාකරණය කරන්න. පරිපාලක වරප්‍රසාද ලබා දීමට හෝ අවලංගු කිරීමට ස්විචය ටොගල් කරන්න.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>User ID</TableHead>
-                <TableHead className="text-right">Admin</TableHead>
+                <TableHead>ඊමේල්</TableHead>
+                <TableHead>පරිශීලක ID</TableHead>
+                <TableHead className="text-right">පරිපාලක</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -121,7 +121,7 @@ export default function UsersPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center">No users found.</TableCell>
+                  <TableCell colSpan={3} className="text-center">පරිශීලකයින් හමු නොවීය.</TableCell>
                 </TableRow>
               )}
             </TableBody>

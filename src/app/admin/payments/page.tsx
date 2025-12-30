@@ -102,16 +102,16 @@ export default function PaymentsPage() {
 
       await batch.commit();
       toast({
-        title: 'Success',
-        description: `Payment has been ${newStatus.toLowerCase()}.`,
+        title: 'සාර්ථකයි',
+        description: `ගෙවීම ${newStatus === 'Approved' ? 'අනුමත කරන ලදී' : 'ප්‍රතික්ෂේප කරන ලදී'}.`,
       });
 
     } catch (error) {
       console.error("Error processing payment:", error);
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Could not process the payment.',
+        title: 'දෝෂයකි',
+        description: 'ගෙවීම සැකසීමට නොහැකි විය.',
       });
     } finally {
       setIsProcessing(null);
@@ -122,25 +122,25 @@ export default function PaymentsPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">Payment Management</h1>
+        <h1 className="text-lg font-semibold md:text-2xl">ගෙවීම් කළමනාකරණය</h1>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Pending Payments</CardTitle>
+          <CardTitle>අනුමත කිරීමට ඇති ගෙවීම්</CardTitle>
           <CardDescription>
-            Review and approve or reject manual payment submissions.
+            අතින් සිදු කරන ලද ගෙවීම් ඉදිරිපත් කිරීම් සමාලෝචනය කර අනුමත කිරීම හෝ ප්‍රතික්ෂේප කිරීම.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>User ID</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>For</TableHead>
-                <TableHead>Slip</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>දිනය</TableHead>
+                <TableHead>පරිශීලක ID</TableHead>
+                <TableHead>මුදල</TableHead>
+                <TableHead>ගෙවීම</TableHead>
+                <TableHead>ගෙවීම් පත්‍රිකාව</TableHead>
+                <TableHead className="text-right">ක්‍රියා</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -160,7 +160,7 @@ export default function PaymentsPage() {
                   <TableRow key={payment.id}>
                     <TableCell>{payment.createdAt.toDate().toLocaleDateString()}</TableCell>
                     <TableCell className="font-mono text-xs">{payment.userId}</TableCell>
-                    <TableCell>LKR {payment.amount.toLocaleString()}</TableCell>
+                    <TableCell>රු. {payment.amount.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{payment.paymentFor}</Badge>
                       <p className="text-xs text-muted-foreground">{payment.targetId}</p>
@@ -168,11 +168,11 @@ export default function PaymentsPage() {
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">View Slip</Button>
+                          <Button variant="outline" size="sm">පත්‍රිකාව බලන්න</Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-md">
                           <DialogHeader>
-                            <DialogTitle>Payment Slip</DialogTitle>
+                            <DialogTitle>ගෙවීම් පත්‍රිකාව</DialogTitle>
                           </DialogHeader>
                           <div className="relative mt-4 aspect-square w-full">
                             <Image src={payment.paymentSlipUrl} alt="Payment Slip" layout="fill" objectFit="contain" />
@@ -187,7 +187,7 @@ export default function PaymentsPage() {
                         onClick={() => handlePaymentAction(payment, 'Rejected')}
                         disabled={isProcessing === payment.id}
                       >
-                        {isProcessing === payment.id ? '...' : 'Reject'}
+                        {isProcessing === payment.id ? '...' : 'ප්‍රතික්ෂේප කරන්න'}
                       </Button>
                       <Button
                         size="sm"
@@ -195,14 +195,14 @@ export default function PaymentsPage() {
                         onClick={() => handlePaymentAction(payment, 'Approved')}
                         disabled={isProcessing === payment.id}
                       >
-                        {isProcessing === payment.id ? '...' : 'Approve'}
+                        {isProcessing === payment.id ? '...' : 'අනුමත කරන්න'}
                       </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-24">No pending payments.</TableCell>
+                  <TableCell colSpan={6} className="text-center h-24">අනුමත කිරීමට ගෙවීම් නොමැත.</TableCell>
                 </TableRow>
               )}
             </TableBody>

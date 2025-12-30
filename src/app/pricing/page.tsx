@@ -11,10 +11,10 @@ export default function PricingPage() {
         <div className="flex flex-col items-center py-12 md:py-24 bg-gray-50">
             <div className="container mx-auto px-4 text-center">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold text-foreground">
-                    Membership Plans
+                    සාමාජික සැලසුම්
                 </h1>
                 <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-                    Choose a plan that suits your needs and start posting unlimited ads today.
+                    ඔබේ අවශ්‍යතාවලට ගැලපෙන සැලැස්මක් තෝරා අසීමිත දැන්වීම් අදම පළ කිරීම ආරම්භ කරන්න.
                 </p>
             </div>
 
@@ -28,7 +28,7 @@ export default function PricingPage() {
                             </CardHeader>
                             <CardContent className="flex-grow">
                                 <div className="text-center mb-6">
-                                    <span className="text-4xl font-bold">LKR {plan.price.toLocaleString()}</span>
+                                    <span className="text-4xl font-bold">රු. {plan.price.toLocaleString()}</span>
                                     <span className="text-lg text-muted-foreground">/ {plan.duration}</span>
                                 </div>
                                 <ul className="space-y-3 text-muted-foreground">
@@ -42,7 +42,7 @@ export default function PricingPage() {
                             </CardContent>
                             <CardFooter>
                                 <Button asChild className="w-full" size="lg">
-                                    <Link href={`/payment/${plan.id}`}>Choose Plan</Link>
+                                    <Link href={`/payment/${plan.id}`}>සැලැස්ම තෝරන්න</Link>
                                 </Button>
                             </CardFooter>
                         </Card>

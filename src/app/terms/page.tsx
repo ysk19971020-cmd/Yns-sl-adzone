@@ -5,92 +5,92 @@ export default function TermsAndConditionsPage() {
   return (
     <div className="container mx-auto max-w-4xl py-12 md:py-24 px-4">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">Terms and Conditions</h1>
+        <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">නියම සහ කොන්දේසි</h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          අවසන් වරට යාවත්කාලීන කරන ලද්දේ: {new Date().toLocaleDateString('si-LK', { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Welcome to AdZone Lanka!</CardTitle>
+          <CardTitle>AdZone Lanka වෙත සාදරයෙන් පිළිගනිමු!</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-6">
-            These Terms and Conditions ("Terms") govern your use of the AdZone Lanka website, services, and applications (collectively, the "Platform"). By accessing or using our Platform, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our Platform.
+            මෙම නියම සහ කොන්දේසි ("නියම") AdZone Lanka වෙබ් අඩවිය, සේවාවන් සහ යෙදුම් (එකතුව, "වේදිකාව") ඔබගේ භාවිතය පාලනය කරයි. අපගේ වේදිකාවට පිවිසීමෙන් හෝ භාවිතා කිරීමෙන්, ඔබ මෙම නියමයන්ට බැඳී සිටීමට එකඟ වේ. ඔබ මෙම නියමයන්ට එකඟ නොවන්නේ නම්, කරුණාකර අපගේ වේදිකාව භාවිතා නොකරන්න.
           </p>
 
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1">
-              <AccordionTrigger className="text-lg font-semibold">1. User Accounts</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">1. පරිශීලක ගිණුම්</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>To access certain features, you must create an account. You agree to provide accurate, current, and complete information during the registration process. You are responsible for safeguarding your password and for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.</p>
+                <p>ඇතැම් විශේෂාංග වෙත පිවිසීමට, ඔබ ගිණුමක් සෑදිය යුතුය. ලියාපදිංචි කිරීමේ ක්‍රියාවලියේදී නිවැරදි, වත්මන්, සහ සම්පූර්ණ තොරතුරු සැපයීමට ඔබ එකඟ වේ. ඔබගේ මුරපදය ආරක්ෂා කිරීම සහ ඔබගේ ගිණුම යටතේ සිදුවන සියලුම ක්‍රියාකාරකම් සඳහා ඔබ වගකිව යුතුය. ඔබගේ ගිණුමේ කිසියම් අනවසර භාවිතයක් පිළිබඳව ඔබ වහාම අපට දැනුම් දිය යුතුය.</p>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2">
-              <AccordionTrigger className="text-lg font-semibold">2. Posting Ads</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">2. දැන්වීම් පළ කිරීම</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>You are solely responsible for all information, content, and materials you post on the Platform, including but not limited to text, images, and contact information ("Your Content"). You warrant that you own or have the necessary rights to post Your Content and that it does not violate any laws or third-party rights.</p>
-                <p>AdZone Lanka reserves the right, but is not obligated, to review, edit, or remove any ad that we believe, in our sole discretion, violates these Terms or is otherwise objectionable.</p>
+                <p>පෙළ, පින්තූර, සහ සම්බන්ධතා තොරතුරු ඇතුළුව, වේදිකාවේ ඔබ පළ කරන සියලුම තොරතුරු, අන්තර්ගතය, සහ ද්‍රව්‍ය ("ඔබගේ අන්තර්ගතය") සඳහා ඔබ තනිවම වගකිව යුතුය. ඔබගේ අන්තර්ගතය පළ කිරීමට ඔබට හිමිකම හෝ අවශ්‍ය අයිතිවාසිකම් ඇති බවටත්, එය කිසිදු නීතියක් හෝ තෙවන පාර්ශවීය අයිතිවාසිකම් උල්ලංඝනය නොකරන බවටත් ඔබ සහතික විය යුතුය.</p>
+                <p>මෙම නියමයන් උල්ලංඝනය කරන බවට හෝ වෙනත් ආකාරයකින් විරෝධතා දැක්විය හැකි බවට අපගේ තනි අභිමතය පරිදි අප විශ්වාස කරන ඕනෑම දැන්වීමක් සමාලෝචනය කිරීමට, සංස්කරණය කිරීමට, හෝ ඉවත් කිරීමට AdZone Lanka හට අයිතිය ඇත, නමුත් එය බැඳී නොමැත.</p>
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-3">
-              <AccordionTrigger className="text-lg font-semibold">3. Prohibited Content & Conduct</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">3. තහනම් අන්තර්ගතය සහ හැසිරීම</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>You agree not to post any content or engage in any conduct that is:</p>
+                <p>පහත දැක්වෙන කිසිදු අන්තර්ගතයක් පළ නොකිරීමට හෝ එවැනි හැසිරීමක නිරත නොවීමට ඔබ එකඟ වේ:</p>
                 <ul className="list-disc pl-6 space-y-1">
-                  <li>Illegal, fraudulent, or deceptive.</li>
-                  <li>Infringing on any third party's copyright, patent, trademark, trade secret, or other proprietary rights.</li>
-                  <li>Obscene, pornographic, or promoting sexually explicit materials (outside of designated categories and in compliance with the law).</li>
-                  <li>Defamatory, threatening, or harassing.</li>
-                  <li>Promoting discrimination, bigotry, racism, hatred, or harm against any individual or group.</li>
-                  <li>Spam, junk mail, chain letters, or pyramid schemes.</li>
+                  <li>නීති විරෝධී, වංචනික, හෝ රැවටිලිකාර.</li>
+                  <li>ඕනෑම තෙවන පාර්ශවයක ප්‍රකාශන හිමිකම, පේටන්ට් බලපත්‍රය, වෙළඳ ලකුණ, වෙළඳ රහස, හෝ වෙනත් හිමිකාර අයිතිවාසිකම් උල්ලංඝනය කිරීම.</li>
+                  <li>අසභ්‍ය, කාමුක, හෝ ලිංගිකව ප්‍රකාශිත ද්‍රව්‍ය ප්‍රවර්ධනය කිරීම (නීතියට අනුකූලව සහ නියමිත ප්‍රවර්ග වලින් බැහැරව).</li>
+                  <li>අපහාසාත්මක, තර්ජනාත්මක, හෝ හිරිහැර කරන.</li>
+                  <li>ඕනෑම පුද්ගලයෙකුට හෝ කණ්ඩායමකට එරෙහිව වෙනස්කම් කිරීම, අගතිගාමීත්වය, ජාතිවාදය, වෛරය, හෝ හානිය ප්‍රවර්ධනය කිරීම.</li>
+                  <li>අයාචිත තැපැල්, කුණු තැපැල්, දාම ලිපි, හෝ පිරමිඩ යෝජනා ක්‍රම.</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4">
-              <AccordionTrigger className="text-lg font-semibold">4. Payments, Memberships, and Banners</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">4. ගෙවීම්, සාමාජිකත්ව, සහ බැනර්</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>Certain features, such as memberships and banner ads, require payment. All payments are processed through third-party payment gateways. You agree to pay all applicable fees as described on the Platform.</p>
-                <p>Payments for memberships and banner ads are subject to review and approval. An administrator will review your payment confirmation (e.g., bank slip). The service will be activated only upon approval. We reserve the right to reject any payment and refuse service for any reason. All fees are non-refundable once a service has been approved and activated.</p>
+                <p>සාමාජිකත්ව සහ බැනර් දැන්වීම් වැනි ඇතැම් විශේෂාංග සඳහා ගෙවීම් අවශ්‍ය වේ. සියලුම ගෙවීම් තෙවන පාර්ශවීය ගෙවීම් ද්වාර හරහා සිදු කෙරේ. වේදිකාවේ විස්තර කර ඇති පරිදි අදාළ සියලුම ගාස්තු ගෙවීමට ඔබ එකඟ වේ.</p>
+                <p>සාමාජිකත්ව සහ බැනර් දැන්වීම් සඳහා වන ගෙවීම් සමාලෝචනයට සහ අනුමැතියට යටත් වේ. පරිපාලකයෙකු ඔබගේ ගෙවීම් තහවුරු කිරීම (උදා: බැංකු පත්‍රිකාව) සමාලෝචනය කරනු ඇත. සේවාව සක්‍රිය කරනු ලබන්නේ අනුමැතිය මත පමණි. ඕනෑම හේතුවක් මත ඕනෑම ගෙවීමක් ප්‍රතික්ෂේප කිරීමට සහ සේවාව ප්‍රතික්ෂේප කිරීමට අපට අයිතිය ඇත. සේවාවක් අනුමත කර සක්‍රිය කළ පසු සියලුම ගාස්තු ආපසු ගෙවනු නොලැබේ.</p>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-5">
-              <AccordionTrigger className="text-lg font-semibold">5. Disclaimer of Warranties</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">5. වගකීම් ප්‍රතික්ෂේප කිරීම</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>The Platform is provided "as is" and "as available" without warranties of any kind, either express or implied. AdZone Lanka does not warrant that the Platform will be uninterrupted, secure, or error-free. We make no warranty regarding the quality, accuracy, timeliness, truthfulness, completeness, or reliability of any content obtained through the Platform.</p>
+                <p>වේදිකාව "පවතින ආකාරයටම" සහ "ලබා ගත හැකි පරිදි" කිසිදු ආකාරයක, ප්‍රකාශිත හෝ ව්‍යංග, වගකීමකින් තොරව සපයනු ලැබේ. AdZone Lanka වේදිකාව අඛණ්ඩව, ආරක්ෂිතව, හෝ දෝෂ රහිතව පවතිනු ඇති බවට සහතික නොවේ. වේදිකාව හරහා ලබා ගන්නා ඕනෑම අන්තර්ගතයක ගුණාත්මකභාවය, නිරවද්‍යතාවය, කාලෝචිත බව, සත්‍යතාව, සම්පූර්ණත්වය, හෝ විශ්වසනීයත්වය පිළිබඳව අපි කිසිදු වගකීමක් නොගනිමු.</p>
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-6">
-              <AccordionTrigger className="text-lg font-semibold">6. Limitation of Liability</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">6. වගකීම් සීමා කිරීම</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>To the maximum extent permitted by applicable law, AdZone Lanka shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from (a) your access to or use of or inability to access or use the Platform; (b) any conduct or content of any third party on the Platform; or (c) unauthorized access, use, or alteration of your transmissions or content.</p>
+                <p>අදාළ නීතියෙන් අවසර දී ඇති උපරිම ප්‍රමාණයට, (අ) ඔබගේ ප්‍රවේශය හෝ භාවිතය හෝ වේදිකාවට පිවිසීමට හෝ භාවිතා කිරීමට නොහැකි වීම; (ආ) වේදිකාවේ ඕනෑම තෙවන පාර්ශවයක ඕනෑම හැසිරීමක් හෝ අන්තර්ගතයක්; හෝ (ඇ) ඔබගේ සම්ප්‍රේෂණ හෝ අන්තර්ගතයේ අනවසර ප්‍රවේශය, භාවිතය, හෝ වෙනස් කිරීම හේතුවෙන් පැන නගින, වක්‍ර, අහඹු, විශේෂ, ප්‍රතිවිපාක, හෝ දණ්ඩනීය හානි, හෝ ලාභ හෝ ආදායම් අහිමි වීම, දත්ත, භාවිතය, හොඳහිත, හෝ වෙනත් අස්පෘශ්‍ය අලාභ සඳහා AdZone Lanka වගකිව යුතු නොවේ.</p>
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-7">
-              <AccordionTrigger className="text-lg font-semibold">7. Indemnification</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">7. වන්දි ගෙවීම</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>You agree to indemnify and hold harmless AdZone Lanka and its officers, directors, employees, and agents from and against any claims, disputes, demands, liabilities, damages, losses, and costs and expenses, including, without limitation, reasonable legal and accounting fees, arising out of or in any way connected with your access to or use of the Platform or your violation of these Terms.</p>
+                <p>ඔබගේ වේදිකාවට ප්‍රවේශ වීම හෝ භාවිතය හෝ මෙම නියමයන් උල්ලංඝනය කිරීම සම්බන්ධයෙන් පැන නගින ඕනෑම සහ සියලුම හිමිකම්, ආරවුල්, ඉල්ලීම්, වගකීම්, හානි, අලාභ, සහ පිරිවැය සහ වියදම්, සීමාවකින් තොරව, සාධාරණ නීතිමය සහ ගිණුම්කරණ ගාස්තු ඇතුළුව, AdZone Lanka සහ එහි නිලධාරීන්, අධ්‍යක්ෂවරුන්, සේවකයින්, සහ නියෝජිතයින්ට වන්දි ගෙවීමට සහ ඔවුන් හානිවලින් නිදහස් කිරීමට ඔබ එකඟ වේ.</p>
               </AccordionContent>
             </AccordionItem>
             
             <AccordionItem value="item-8">
-              <AccordionTrigger className="text-lg font-semibold">8. Changes to Terms</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">8. නියමයන්හි වෙනස්කම්</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>We may modify these Terms at any time. If we do so, we'll let you know either by posting the modified Terms on the site or through other communications. It's important that you review the Terms whenever we modify them because if you continue to use the Platform after we have posted modified Terms, you are indicating to us that you agree to be bound by the modified Terms.</p>
+                <p>අපට ඕනෑම වේලාවක මෙම නියමයන් වෙනස් කළ හැකිය. එසේ කළහොත්, වෙබ් අඩවියේ වෙනස් කළ නියමයන් පළ කිරීමෙන් හෝ වෙනත් සන්නිවේදන මාර්ග හරහා අපි ඔබට දන්වන්නෙමු. අප වෙනස් කළ විට නියමයන් සමාලෝචනය කිරීම වැදගත් වේ, કારણ કે අප වෙනස් කළ නියමයන් පළ කිරීමෙන් පසුව ඔබ වේදිකාව දිගටම භාවිතා කරන්නේ නම්, ඔබ වෙනස් කළ නියමයන්ට බැඳී සිටීමට එකඟ වන බව අපට දන්වයි.</p>
               </AccordionContent>
             </AccordionItem>
             
              <AccordionItem value="item-9">
-              <AccordionTrigger className="text-lg font-semibold">9. Governing Law</AccordionTrigger>
+              <AccordionTrigger className="text-lg font-semibold">9. පාලන නීතිය</AccordionTrigger>
               <AccordionContent className="text-muted-foreground space-y-2">
-                <p>These Terms and any action related thereto will be governed by the laws of the Democratic Socialist Republic of Sri Lanka without regard to its conflict of laws provisions.</p>
+                <p>මෙම නියමයන් සහ ඊට අදාළ ඕනෑම ක්‍රියාවක්, එහි නීති ගැටුම් විධිවිධාන නොසලකා හරිමින්, ශ්‍රී ලංකා ප්‍රජාතන්ත්‍රවාදී සමාජවාදී ජනරජයේ නීති මගින් පාලනය වේ.</p>
               </AccordionContent>
             </AccordionItem>
 

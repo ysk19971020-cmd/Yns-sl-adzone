@@ -84,7 +84,7 @@ export function Header({ showBanners }: { showBanners: boolean }) {
               href={`/pricing`}
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Pricing
+              මිල ගණන්
             </Link>
           {categories.map((category) => (
             <Link
@@ -99,13 +99,13 @@ export function Header({ showBanners }: { showBanners: boolean }) {
               href={`/about`}
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              About
+              අප ගැන
             </Link>
              <Link
               href={`/contact`}
               className="transition-colors hover:text-foreground/80 text-foreground/60"
             >
-              Contact
+              අමතන්න
             </Link>
         </nav>
 
@@ -119,20 +119,20 @@ export function Header({ showBanners }: { showBanners: boolean }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>මගේ ගිණුම</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {isAdmin && (
                       <DropdownMenuItem asChild>
                         <Link href="/admin">
                           <Shield className="mr-2 h-4 w-4" />
-                          <span>Admin Panel</span>
+                          <span>පරිපාලක පැනලය</span>
                         </Link>
                       </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem asChild><Link href="/profile">My Profile</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/my-ads">My Ads</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/profile">මගේ පැතිකඩ</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/my-ads">මගේ දැන්වීම්</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>ඉවත් වන්න</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -149,25 +149,25 @@ export function Header({ showBanners }: { showBanners: boolean }) {
           {isClient ? (
             !isUserLoading ? (
               <Link href="/post-ad" className={cn(buttonVariants({ className: "bg-accent hover:bg-accent/90" }))}>
-                Post Ad
+                දැන්වීමක් පළ කරන්න
               </Link>
             ) : (
-              <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
+              <Button disabled className="bg-accent hover:bg-accent/90">දැන්වීමක් පළ කරන්න</Button>
             )
           ) : (
-             <Button disabled className="bg-accent hover:bg-accent/90">Post Ad</Button>
+             <Button disabled className="bg-accent hover:bg-accent/90">දැන්වීමක් පළ කරන්න</Button>
           )}
           
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle Menu</span>
+                <span className="sr-only">මෙනුව විවෘත කරන්න</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-               <SheetTitle className="sr-only">Menu</SheetTitle>
-               <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
+               <SheetTitle className="sr-only">මෙනුව</SheetTitle>
+               <SheetDescription className="sr-only">ප්‍රධාන මෙනුව</SheetDescription>
               <div className="p-6">
                 <Link href="/" className="flex items-center gap-2 mb-8" onClick={() => setOpen(false)}>
                   <Logo />
@@ -178,7 +178,7 @@ export function Header({ showBanners }: { showBanners: boolean }) {
                     className="font-medium text-lg"
                     onClick={() => setOpen(false)}
                   >
-                    Pricing
+                    මිල ගණන්
                   </Link>
                   {categories.map((category) => (
                     <Link
@@ -195,18 +195,18 @@ export function Header({ showBanners }: { showBanners: boolean }) {
                         className="font-medium text-lg"
                         onClick={() => setOpen(false)}
                     >
-                        About
+                        අප ගැන
                     </Link>
                     <Link
                         href={`/contact`}
                         className="font-medium text-lg"
                         onClick={() => setOpen(false)}
                     >
-                        Contact
+                        අමතන්න
                     </Link>
                    {isClient && !isUserLoading && !user ? (
                      <Button asChild variant="outline" onClick={() => setOpen(false)}>
-                        <Link href="/login">Login</Link>
+                        <Link href="/login">පිවිසෙන්න</Link>
                      </Button>
                    ) : null}
                 </nav>

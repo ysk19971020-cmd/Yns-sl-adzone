@@ -49,14 +49,14 @@ export default function MyAdsPage() {
     try {
       await deleteDoc(doc(firestore, 'ads', adId));
       toast({
-        title: 'Ad Deleted',
-        description: 'Your ad has been successfully deleted.',
+        title: 'දැන්වීම මකා දමන ලදී',
+        description: 'ඔබගේ දැන්වීම සාර්ථකව මකා දමන ලදී.',
       });
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to delete ad: ' + error.message,
+        title: 'දෝෂයකි',
+        description: 'දැන්වීම මැකීමට අසමත් විය: ' + error.message,
       });
     }
   };
@@ -86,8 +86,8 @@ export default function MyAdsPage() {
     <div className="container mx-auto max-w-4xl py-12 px-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl font-headline">My Ads</CardTitle>
-          <CardDescription>View and manage all the ads you have posted.</CardDescription>
+          <CardTitle className="text-3xl font-headline">මගේ දැන්වීම්</CardTitle>
+          <CardDescription>ඔබ පළ කර ඇති සියලුම දැන්වීම් බලන්න සහ කළමනාකරණය කරන්න.</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoadingAds && (
@@ -114,14 +114,14 @@ export default function MyAdsPage() {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure you want to delete this ad?</AlertDialogTitle>
+                          <AlertDialogTitle>ඔබට මෙම දැන්වීම මැකීමට අවශ්‍ය බව විශ්වාසද?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your ad "{ad.title}".
+                            මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. මෙය ඔබගේ "{ad.title}" දැන්වීම ස්ථිරවම මකා දමනු ඇත.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(ad.id)}>Delete</AlertDialogAction>
+                          <AlertDialogCancel>අවලංගු කරන්න</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(ad.id)}>මකන්න</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -131,12 +131,12 @@ export default function MyAdsPage() {
           ) : (
             !isLoadingAds && (
                 <div className="flex flex-1 flex-col items-center justify-center rounded-lg border border-dashed shadow-sm p-12 text-center">
-                    <h3 className="text-2xl font-bold tracking-tight">You haven't posted any ads yet.</h3>
+                    <h3 className="text-2xl font-bold tracking-tight">ඔබ තවමත් කිසිදු දැන්වීමක් පළ කර නැත.</h3>
                     <p className="text-sm text-muted-foreground mt-2">
-                        Ready to sell something? Post your first ad now!
+                        යමක් විකිණීමට සූදානම්ද? දැන් ඔබේ පළමු දැන්වීම පළ කරන්න!
                     </p>
                     <Button asChild className="mt-6">
-                        <a href="/post-ad">Post an Ad</a>
+                        <a href="/post-ad">දැන්වීමක් පළ කරන්න</a>
                     </Button>
                 </div>
             )

@@ -36,14 +36,17 @@ export default function RootLayout({
     setIsClient(true);
   }, []);
   
-  const showBanners = pathname === '/';
+  const showBanners = isClient && (
+    pathname === '/' ||
+    pathname.startsWith('/category/')
+  );
 
 
   return (
-    <html lang="en" className="light" suppressHydrationWarning>
+    <html lang="si" className="light" suppressHydrationWarning>
       <head>
-        <title>AdZone Lanka - Classified Ads in Sri Lanka</title>
-        <meta name="description" content="The best place to buy and sell in Sri Lanka. Post your ad on AdZone Lanka." />
+        <title>AdZone Lanka - ශ්‍රී ලංකාවේ වර්ගීකෘත දැන්වීම්</title>
+        <meta name="description" content="ශ්‍රී ලංකාවේ මිලදී ගැනීමට සහ විකිණීමට හොඳම ස්ථානය. AdZone Lanka හි ඔබේ දැන්වීම පළ කරන්න." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />

@@ -31,48 +31,48 @@ export interface PricingPlan {
 }
 
 export const categories: Category[] = [
-    { slug: 'vehicles', name: 'Vehicles', icon: Car },
-    { slug: 'properties', name: 'Properties', icon: Building2 },
-    { slug: 'misc', name: 'Misc Ads', icon: Package },
-    { slug: '18-plus', name: '18+ Ads', icon: Ban },
+    { slug: 'vehicles', name: 'වාහන', icon: Car },
+    { slug: 'properties', name: 'දේපළ', icon: Building2 },
+    { slug: 'misc', name: 'විවිධ දැන්වීම්', icon: Package },
+    { slug: '18-plus', name: '18+ දැන්වීම්', icon: Ban },
 ];
 
 export const pricingPlans: PricingPlan[] = [
     {
         id: 'silver',
-        name: 'Silver',
-        description: '3 months of unlimited ads.',
+        name: 'රිදී',
+        description: 'මාස 3ක අසීමිත දැන්වීම්.',
         price: 1500,
-        duration: '3 Months',
+        duration: 'මාස 3',
         durationInMonths: 3,
-        features: ['Unlimited Ads for 3 months', 'Standard ad visibility', 'Email support']
+        features: ['මාස 3ක් සඳහා අසීමිත දැන්වීම්', 'සම්මත දැන්වීම් දෘශ්‍යතාව', 'ඊමේල් සහාය']
     },
     {
         id: 'gold',
-        name: 'Gold',
-        description: '6 months of unlimited ads.',
+        name: 'රන්',
+        description: 'මාස 6ක අසීමිත දැන්වීම්.',
         price: 3000,
-        duration: '6 Months',
+        duration: 'මාස 6',
         durationInMonths: 6,
-        features: ['Unlimited Ads for 6 months', 'Enhanced ad visibility', 'Priority email support']
+        features: ['මාස 6ක් සඳහා අසීමිත දැන්වීම්', 'වැඩි දියුණු කළ දැන්වීම් දෘශ්‍යතාව', 'ප්‍රමුඛතා ඊමේල් සහාය']
     },
     {
         id: 'platinum',
-        name: 'Platinum',
-        description: '9 months of unlimited ads.',
+        name: 'ප්ලැටිනම්',
+        description: 'මාස 9ක අසීමිත දැන්වීම්.',
         price: 6000,
-        duration: '9 Months',
+        duration: 'මාස 9',
         durationInMonths: 9,
-        features: ['Unlimited Ads for 9 months', 'High ad visibility', '24/7 phone & email support']
+        features: ['මාස 9ක් සඳහා අසීමිත දැන්වීම්', 'ඉහළ දැන්වීම් දෘශ්‍යතාව', '24/7 දුරකථන සහ ඊමේල් සහාය']
     },
     {
         id: 'global-vip',
         name: 'Global VIP',
-        description: '1 year of unlimited ads + banner placement.',
+        description: 'වසර 1ක අසීමිත දැන්වීම් + බැනර් ස්ථානගත කිරීම.',
         price: 15000,
-        duration: '1 Year',
+        duration: 'වසර 1',
         durationInMonths: 12,
-        features: ['Unlimited Ads for 1 year', 'Top ad visibility', 'Includes Banner Ads', 'VIP support']
+        features: ['වසර 1ක් සඳහා අසීමිත දැන්වීම්', 'ඉහළම දැන්වීම් දෘශ්‍යතාව', 'බැනර් දැන්වීම් ඇතුළත්', 'VIP සහාය']
     }
 ];
 

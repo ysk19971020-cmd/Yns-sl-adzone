@@ -49,15 +49,15 @@ export default function AdsPage() {
     try {
       await deleteDoc(doc(firestore, 'ads', adId));
       toast({
-        title: "Success",
-        description: "Ad has been deleted successfully.",
+        title: "සාර්ථකයි",
+        description: "දැන්වීම සාර්ථකව මකා දමන ලදී.",
       });
     } catch (error) {
       console.error("Error deleting ad:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Could not delete the ad.",
+        title: "දෝෂයකි",
+        description: "දැන්වීම මැකීමට නොහැකි විය.",
       });
     }
   };
@@ -65,25 +65,25 @@ export default function AdsPage() {
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
       <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">Ad Management</h1>
+        <h1 className="text-lg font-semibold md:text-2xl">දැන්වීම් කළමනාකරණය</h1>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>All Classified Ads</CardTitle>
+          <CardTitle>සියලුම වර්ගීකෘත දැන්වීම්</CardTitle>
           <CardDescription>
-            View and manage all classified ads posted on the platform.
+            වේදිකාවේ පළ කර ඇති සියලුම වර්ගීකෘත දැන්වීම් බලන්න සහ කළමනාකරණය කරන්න.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Ad</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>District</TableHead>
-                <TableHead>User ID</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>දැන්වීම</TableHead>
+                <TableHead>මිල</TableHead>
+                <TableHead>ප්‍රවර්ගය</TableHead>
+                <TableHead>දිස්ත්‍රික්කය</TableHead>
+                <TableHead>පරිශීලක ID</TableHead>
+                <TableHead className="text-right">ක්‍රියා</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -111,7 +111,7 @@ export default function AdsPage() {
                       />
                       <span className="font-medium">{ad.title}</span>
                     </TableCell>
-                    <TableCell>LKR {ad.price.toLocaleString()}</TableCell>
+                    <TableCell>රු. {ad.price.toLocaleString()}</TableCell>
                     <TableCell><Badge variant="outline">{ad.categoryId}</Badge></TableCell>
                     <TableCell>{ad.district}</TableCell>
                     <TableCell className="font-mono text-xs">{ad.userId}</TableCell>
@@ -124,15 +124,14 @@ export default function AdsPage() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogTitle>ඔබට සම්පූර්ණයෙන්ම විශ්වාසද?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the ad
-                                "{ad.title}".
+                                මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. මෙය "{ad.title}" දැන්වීම ස්ථිරවම මකා දමනු ඇත.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteAd(ad.id)}>Delete</AlertDialogAction>
+                              <AlertDialogCancel>අවලංගු කරන්න</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteAd(ad.id)}>මකන්න</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -141,7 +140,7 @@ export default function AdsPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-24">No ads found.</TableCell>
+                  <TableCell colSpan={6} className="text-center h-24">දැන්වීම් හමු නොවීය.</TableCell>
                 </TableRow>
               )}
             </TableBody>

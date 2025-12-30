@@ -66,8 +66,8 @@ export default function ProfilePage() {
     <div className="container mx-auto max-w-2xl py-12 px-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-3xl font-headline">My Profile</CardTitle>
-          <CardDescription>Manage your account details and settings.</CardDescription>
+          <CardTitle className="text-3xl font-headline">මගේ පැතිකඩ</CardTitle>
+          <CardDescription>ඔබගේ ගිණුමේ විස්තර සහ සැකසුම් කළමනාකරණය කරන්න.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center gap-4 p-4 border rounded-lg bg-card-foreground/5">
@@ -76,7 +76,7 @@ export default function ProfilePage() {
             </div>
             <div>
               <h3 className="font-semibold text-xl text-foreground">{user.email}</h3>
-              <p className="text-sm text-muted-foreground">User ID: {user.uid}</p>
+              <p className="text-sm text-muted-foreground">පරිශීලක ID: {user.uid}</p>
             </div>
           </div>
           
@@ -87,32 +87,32 @@ export default function ProfilePage() {
                 ) : activePlan ? (
                   <>
                     <BadgeCheck className="w-10 h-10 text-green-500 mb-2" />
-                    <h4 className="font-semibold capitalize">{activePlan.planId} Plan</h4>
+                    <h4 className="font-semibold capitalize">{activePlan.planId} සැලැස්ම</h4>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Expires on: {format(activePlan.expiryDate.toDate(), 'PPP')}
+                      කල් ඉකුත් වේ: {format(activePlan.expiryDate.toDate(), 'PPP')}
                     </p>
-                    <Button variant="outline" size="sm" asChild><a href="/pricing">Manage Plan</a></Button>
+                    <Button variant="outline" size="sm" asChild><a href="/pricing">සැලැස්ම කළමනාකරණය කරන්න</a></Button>
                   </>
                 ) : (
                   <>
                     <Star className="w-10 h-10 text-accent mb-2" />
-                    <h4 className="font-semibold">Membership</h4>
-                    <p className="text-sm text-muted-foreground mb-3">No Active Plan</p>
-                    <Button variant="outline" size="sm" asChild><a href="/pricing">View Plans</a></Button>
+                    <h4 className="font-semibold">සාමාජිකත්වය</h4>
+                    <p className="text-sm text-muted-foreground mb-3">සක්‍රිය සැලැස්මක් නොමැත</p>
+                    <Button variant="outline" size="sm" asChild><a href="/pricing">සැලසුම් බලන්න</a></Button>
                   </>
                 )}
             </Card>
              <Card className="p-4 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
                 <ShoppingBag className="w-10 h-10 text-accent mb-2" />
-                <h4 className="font-semibold">My Ads</h4>
-                <p className="text-sm text-muted-foreground mb-3">Manage your ads</p>
-                <Button variant="outline" size="sm" asChild><a href="/my-ads">Manage Ads</a></Button>
+                <h4 className="font-semibold">මගේ දැන්වීම්</h4>
+                <p className="text-sm text-muted-foreground mb-3">ඔබගේ දැන්වීම් කළමනාකරණය කරන්න</p>
+                <Button variant="outline" size="sm" asChild><a href="/my-ads">දැන්වීම් කළමනාකරණය කරන්න</a></Button>
             </Card>
           </div>
 
           <div>
             <Button className="w-full" disabled>
-                <Edit className="mr-2 h-4 w-4" /> Edit Profile (Coming Soon)
+                <Edit className="mr-2 h-4 w-4" /> පැතිකඩ සංස්කරණය කරන්න (ළඟදීම)
             </Button>
           </div>
 

@@ -26,40 +26,40 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 // Classified Ad Schema
 const classifiedAdSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters long'),
-  description: z.string().min(20, 'Description must be at least 20 characters long'),
+  title: z.string().min(5, 'මාතෘකාව අවම වශයෙන් අක්ෂර 5ක් විය යුතුය'),
+  description: z.string().min(20, 'විස්තරය අවම වශයෙන් අක්ෂර 20ක් විය යුතුය'),
   price: z.preprocess((a) => parseInt(z.string().parse(a), 10), 
-    z.number().positive('Price must be a positive number')),
-  categoryId: z.string({ required_error: 'Please select a category' }),
+    z.number().positive('මිල ධන සංඛ්‍යාවක් විය යුතුය')),
+  categoryId: z.string({ required_error: 'කරුණාකර ප්‍රවර්ගයක් තෝරන්න' }),
   subCategoryId: z.string().optional(),
-  district: z.string({ required_error: 'Please select a district' }),
-  phoneNumber: z.string().min(10, 'Please enter a valid phone number'),
-  images: z.array(z.instanceof(File)).min(1, 'Please upload at least one image').max(5, 'You can upload a maximum of 5 images'),
+  district: z.string({ required_error: 'කරුණාකර දිස්ත්‍රික්කයක් තෝරන්න' }),
+  phoneNumber: z.string().min(10, 'කරුණාකර වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න'),
+  images: z.array(z.instanceof(File)).min(1, 'කරුණාකර අවම වශයෙන් එක් ඡායාරූපයක් උඩුගත කරන්න').max(5, 'ඔබට උපරිම වශයෙන් ඡායාරූප 5ක් උඩුගත කළ හැක'),
 }).refine(data => {
     if (data.categoryId === '18-plus') {
         return !!data.subCategoryId;
     }
     return true;
 }, {
-    message: 'Please select an 18+ sub-category',
+    message: 'කරුණාකර 18+ උප-ප්‍රවර්ගයක් තෝරන්න',
     path: ['subCategoryId'],
 });
 type ClassifiedAdFormValues = z.infer<typeof classifiedAdSchema>;
 
 // Banner Ad Schema
 const bannerDurations = [
-    { id: '1-week', name: '1 Week', price: 700 },
-    { id: '2-weeks', name: '2 Weeks', price: 1400 },
-    { id: '1-month', name: '1 Month', price: 2800 },
+    { id: '1-week', name: 'සතියක්', price: 700 },
+    { id: '2-weeks', name: 'සති 2ක්', price: 1400 },
+    { id: '1-month', name: 'මාසයක්', price: 2800 },
 ];
-const bannerPositions = ['Top', 'Bottom', 'Left', 'Right'];
+const bannerPositions = ['ඉහළ', 'පහළ', 'වම', 'දකුණ'];
 const bannerAdSchema = z.object({
-  description: z.string().min(10, 'Description must be at least 10 characters long'),
-  categoryId: z.string({ required_error: 'Please select a category' }),
-  position: z.string({ required_error: 'Please select a banner position' }),
-  duration: z.string({ required_error: 'Please select a duration' }),
-  whatsappNumber: z.string().min(10, 'Please enter a valid phone number'),
-  image: z.instanceof(File).refine(file => file.size > 0, 'Please upload an image'),
+  description: z.string().min(10, 'විස්තරය අවම වශයෙන් අක්ෂර 10ක් විය යුතුය'),
+  categoryId: z.string({ required_error: 'කරුණාකර ප්‍රවර්ගයක් තෝරන්න' }),
+  position: z.string({ required_error: 'කරුණාකර බැනර් ස්ථානයක් තෝරන්න' }),
+  duration: z.string({ required_error: 'කරුණාකර කාල සීමාවක් තෝරන්න' }),
+  whatsappNumber: z.string().min(10, 'කරුණාකර වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න'),
+  image: z.instanceof(File).refine(file => file.size > 0, 'කරුණාකර ඡායාරූපයක් උඩුගත කරන්න'),
 });
 type BannerAdFormValues = z.infer<typeof bannerAdSchema>;
 
@@ -100,11 +100,11 @@ export default function PostAdPage() {
 
 
   if (isUserLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">පූරණය වෙමින්...</div>;
   }
   
   if (!user) {
-      return <div className="flex justify-center items-center h-screen">Redirecting to login...</div>;
+      return <div className="flex justify-center items-center h-screen">පිවිසුම් පිටුවට යොමු කරමින්...</div>;
   }
   
   // Handlers for Classified Ad Form
@@ -112,7 +112,7 @@ export default function PostAdPage() {
     const files = Array.from(e.target.files || []);
     const currentImages = field.value || [];
     if (currentImages.length + files.length > 5) {
-      toast({ variant: 'destructive', title: 'Too many images', description: 'You can only upload a maximum of 5 images.' });
+      toast({ variant: 'destructive', title: 'ඡායාරූප ඕනෑවට වඩා', description: 'ඔබට උඩුගත කළ හැක්කේ උපරිම වශයෙන් ඡායාරූප 5ක් පමණි.' });
       return;
     }
     const newImages = [...currentImages, ...files];
@@ -130,7 +130,7 @@ export default function PostAdPage() {
   const onClassifiedSubmit = async (data: ClassifiedAdFormValues) => {
      setIsLoading(true);
      if (!firestore || !user) {
-         toast({ variant: 'destructive', title: 'Error', description: 'User or database not ready.' });
+         toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'පරිශීලක හෝ දත්ත සමුදාය සූදානම් නැත.' });
          setIsLoading(false);
          return;
      }
@@ -176,12 +176,12 @@ export default function PostAdPage() {
             status: 'active' // Or 'pending' if you want admin approval for ads
         });
         
-        toast({ title: 'Success!', description: 'Your ad has been posted successfully.' });
+        toast({ title: 'සාර්ථකයි!', description: 'ඔබගේ දැන්වීම සාර්ථකව පළ කරන ලදී.' });
         router.push('/');
 
      } catch(error: any) {
         console.error("Ad posting error:", error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Failed to post ad. ' + error.message });
+        toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'දැන්වීම පළ කිරීමට අසමත් විය. ' + error.message });
      } finally {
         setIsLoading(false);
      }
@@ -228,23 +228,23 @@ export default function PostAdPage() {
     <div className="container mx-auto max-w-3xl py-12">
       <Card>
         <CardHeader>
-          <CardTitle>Post Your Ad</CardTitle>
-          <CardDescription>Choose your ad type and fill in the details below.</CardDescription>
+          <CardTitle>ඔබේ දැන්වීම පළ කරන්න</CardTitle>
+          <CardDescription>ඔබේ දැන්වීම් වර්ගය තෝරා පහත විස්තර පුරවන්න.</CardDescription>
         </CardHeader>
         <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="classified">Classified Ad</TabsTrigger>
-                    <TabsTrigger value="banner">Banner Ad</TabsTrigger>
+                    <TabsTrigger value="classified">වර්ගීකෘත දැන්වීම</TabsTrigger>
+                    <TabsTrigger value="banner">බැනර් දැන්වීම</TabsTrigger>
                 </TabsList>
                 <TabsContent value="classified">
-                   <p className="text-sm text-muted-foreground my-4">Post items, properties, or services. Requires an active membership plan to be visible.</p>
+                   <p className="text-sm text-muted-foreground my-4">භාණ්ඩ, දේපළ, හෝ සේවා පළ කරන්න. දෘශ්‍යමාන වීම සඳහා සක්‍රිය සාමාජික සැලැස්මක් අවශ්‍ය වේ.</p>
                    <Form {...classifiedForm}>
                         <form onSubmit={classifiedForm.handleSubmit(onClassifiedSubmit)} className="space-y-8">
                             <FormField control={classifiedForm.control} name="title" render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Ad Title</FormLabel>
-                                <FormControl><Input placeholder="e.g., Toyota Aqua for Sale" {...field} /></FormControl>
+                                <FormLabel>දැන්වීමේ මාතෘකාව</FormLabel>
+                                <FormControl><Input placeholder="උදා: Toyota Aqua for Sale" {...field} /></FormControl>
                                 <FormMessage />
                                 </FormItem>
                             )} />
@@ -252,9 +252,9 @@ export default function PostAdPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <FormField control={classifiedForm.control} name="categoryId" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category</FormLabel>
+                                    <FormLabel>ප්‍රවර්ගය</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger></FormControl>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="ප්‍රවර්ගයක් තෝරන්න" /></SelectTrigger></FormControl>
                                     <SelectContent>{categories.map(cat => (<SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>))}</SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -263,9 +263,9 @@ export default function PostAdPage() {
                                 {selectedMainCategory === '18-plus' && (
                                     <FormField control={classifiedForm.control} name="subCategoryId" render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>18+ Sub-Category</FormLabel>
+                                        <FormLabel>18+ උප-ප්‍රවර්ගය</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a sub-category" /></SelectTrigger></FormControl>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="උප-ප්‍රවර්ගයක් තෝරන්න" /></SelectTrigger></FormControl>
                                         <SelectContent>{subCategories18Plus.map(cat => (<SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>))}</SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -277,9 +277,9 @@ export default function PostAdPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <FormField control={classifiedForm.control} name="district" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>District</FormLabel>
+                                    <FormLabel>දිස්ත්‍රික්කය</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a district" /></SelectTrigger></FormControl>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="දිස්ත්‍රික්කයක් තෝරන්න" /></SelectTrigger></FormControl>
                                     <SelectContent>{districts.map(dist => (<SelectItem key={dist} value={dist}>{dist}</SelectItem>))}</SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -287,8 +287,8 @@ export default function PostAdPage() {
                                 )}/>
                                  <FormField control={classifiedForm.control} name="price" render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Price (LKR)</FormLabel>
-                                    <FormControl><Input type="number" placeholder="Enter price" {...field} /></FormControl>
+                                    <FormLabel>මිල (රු.)</FormLabel>
+                                    <FormControl><Input type="number" placeholder="මිල ඇතුළත් කරන්න" {...field} /></FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )} />
@@ -296,27 +296,27 @@ export default function PostAdPage() {
                             
                             <FormField control={classifiedForm.control} name="phoneNumber" render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Contact Number</FormLabel>
-                                <FormControl><Input type="tel" placeholder="e.g., 0771234567" {...field} /></FormControl>
+                                <FormLabel>දුරකථන අංකය</FormLabel>
+                                <FormControl><Input type="tel" placeholder="උදා: 0771234567" {...field} /></FormControl>
                                 <FormMessage />
                                 </FormItem>
                             )} />
 
                             <FormField control={classifiedForm.control} name="description" render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Description</FormLabel>
-                                <FormControl><Textarea placeholder="Provide a detailed description..." rows={6} {...field} /></FormControl>
+                                <FormLabel>විස්තරය</FormLabel>
+                                <FormControl><Textarea placeholder="සවිස්තරාත්මක විස්තරයක් ලබා දෙන්න..." rows={6} {...field} /></FormControl>
                                 <FormMessage />
                                 </FormItem>
                             )} />
 
                             <FormField control={classifiedForm.control} name="images" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Upload Images (up to 5)</FormLabel>
+                                    <FormLabel>ඡායාරූප උඩුගත කරන්න (උපරිම 5)</FormLabel>
                                     <FormControl>
                                         <div className="relative border-2 border-dashed border-muted-foreground/50 rounded-lg p-6 text-center hover:border-primary cursor-pointer">
                                             <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                                            <p className="mt-2 text-sm text-muted-foreground">Click or drag files here</p>
+                                            <p className="mt-2 text-sm text-muted-foreground">මෙහි ක්ලික් කරන්න හෝ ගොනු ඇද දමන්න</p>
                                             <Input type="file" className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" multiple onChange={(e) => handleClassifiedImageChange(e, field)} />
                                         </div>
                                     </FormControl>
@@ -337,20 +337,20 @@ export default function PostAdPage() {
                             )} />
 
                             <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                                {isLoading ? 'Posting Ad...' : 'Post Ad'}
+                                {isLoading ? 'දැන්වීම පළ කරමින්...' : 'දැන්වීම පළ කරන්න'}
                             </Button>
                         </form>
                     </Form>
                 </TabsContent>
                 <TabsContent value="banner">
-                    <p className="text-sm text-muted-foreground my-4">Promote your business on our prime advertising spaces. Payment is required per banner.</p>
+                    <p className="text-sm text-muted-foreground my-4">අපගේ ප්‍රධාන වෙළඳ දැන්වීම් අවකාශයන්හි ඔබේ ව්‍යාපාරය ප්‍රවර්ධනය කරන්න. එක් බැනරයකට ගෙවීම අවශ්‍ය වේ.</p>
                     <Form {...bannerForm}>
                         <form onSubmit={bannerForm.handleSubmit(onBannerSubmit)} className="space-y-8">
                              <FormField control={bannerForm.control} name="categoryId" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category</FormLabel>
+                                    <FormLabel>ප්‍රවර්ගය</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category for the banner" /></SelectTrigger></FormControl>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="බැනරය සඳහා ප්‍රවර්ගයක් තෝරන්න" /></SelectTrigger></FormControl>
                                     <SelectContent>{categories.map(cat => (<SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>))}</SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -359,9 +359,9 @@ export default function PostAdPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <FormField control={bannerForm.control} name="position" render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Banner Position</FormLabel>
+                                    <FormLabel>බැනර් ස්ථානය</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a position" /></SelectTrigger></FormControl>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="ස්ථානයක් තෝරන්න" /></SelectTrigger></FormControl>
                                         <SelectContent>{bannerPositions.map(pos => (<SelectItem key={pos} value={pos}>{pos}</SelectItem>))}</SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -369,9 +369,9 @@ export default function PostAdPage() {
                                 )} />
                                 <FormField control={bannerForm.control} name="duration" render={({ field }) => (
                                     <FormItem>
-                                    <FormLabel>Ad Duration</FormLabel>
+                                    <FormLabel>දැන්වීමේ කාල සීමාව</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a duration" /></SelectTrigger></FormControl>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="කාල සීමාවක් තෝරන්න" /></SelectTrigger></FormControl>
                                         <SelectContent>{bannerDurations.map(dur => (<SelectItem key={dur.id} value={dur.id}>{dur.name}</SelectItem>))}</SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -381,28 +381,28 @@ export default function PostAdPage() {
                             
                             <FormField control={bannerForm.control} name="whatsappNumber" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>WhatsApp Number</FormLabel>
-                                    <FormControl><Input placeholder="e.g., 0771234567" {...field} /></FormControl>
+                                    <FormLabel>WhatsApp අංකය</FormLabel>
+                                    <FormControl><Input placeholder="උදා: 0771234567" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
 
                             <FormField control={bannerForm.control} name="description" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Full Description</FormLabel>
-                                    <FormControl><Textarea placeholder="Provide a detailed description for your banner ad..." rows={4} {...field} /></FormControl>
+                                    <FormLabel>සම්පූර්ණ විස්තරය</FormLabel>
+                                    <FormControl><Textarea placeholder="ඔබගේ බැනර් දැන්වීම සඳහා සවිස්තරාත්මක විස්තරයක් ලබා දෙන්න..." rows={4} {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
 
                              <FormField control={bannerForm.control} name="image" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Upload Banner Image</FormLabel>
+                                    <FormLabel>බැනර් රූපය උඩුගත කරන්න</FormLabel>
                                     {!bannerImagePreview ? (
                                     <FormControl>
                                         <div className="relative border-2 border-dashed border-muted-foreground/50 rounded-lg p-6 text-center hover:border-primary cursor-pointer">
                                             <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                                            <p className="mt-2 text-sm text-muted-foreground">Click or drag file here to upload</p>
+                                            <p className="mt-2 text-sm text-muted-foreground">උඩුගත කිරීමට මෙහි ක්ලික් කරන්න හෝ ගොනුව ඇද දමන්න</p>
                                             <Input type="file" className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleBannerImageChange(e, field)} />
                                         </div>
                                     </FormControl>
@@ -419,12 +419,12 @@ export default function PostAdPage() {
                             )} />
 
                             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                                <h3 className="font-semibold text-lg">Total Amount Due</h3>
-                                <p className="text-3xl font-bold text-primary mt-1">LKR {calculatedPrice.toLocaleString()}</p>
+                                <h3 className="font-semibold text-lg">ගෙවිය යුතු මුළු මුදල</h3>
+                                <p className="text-3xl font-bold text-primary mt-1">රු. {calculatedPrice.toLocaleString()}</p>
                             </div>
 
                             <Button type="submit" size="lg" className="w-full" disabled={isLoading || calculatedPrice <= 0}>
-                                {isLoading ? 'Processing...' : 'Proceed to Payment'}
+                                {isLoading ? 'සකසමින්...' : 'ගෙවීම් පිටුවට යන්න'}
                             </Button>
                         </form>
                     </Form>

@@ -15,7 +15,7 @@ export function AdCard({ ad }: AdCardProps) {
   const adId = ad.id;
   const postedAt = ad.createdAt?.toDate() 
     ? formatDistanceToNow(ad.createdAt.toDate(), { addSuffix: true }) 
-    : 'recently';
+    : 'මෑතකදී';
   
   return (
     <Link href={`/ad/${adId}`}>
@@ -44,7 +44,7 @@ export function AdCard({ ad }: AdCardProps) {
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center text-lg font-semibold text-primary">
               <Tag className="h-5 w-5 mr-1.5" />
-              <span>LKR {ad.price.toLocaleString()}</span>
+              <span>රු. {ad.price.toLocaleString()}</span>
             </div>
             <span className="text-xs text-muted-foreground">{postedAt}</span>
           </div>

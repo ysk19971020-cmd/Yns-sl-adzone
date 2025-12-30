@@ -69,8 +69,8 @@ export default function AdDetailPage() {
         const url = window.location.href;
         navigator.clipboard.writeText(url).then(() => {
             toast({
-                title: "Link Copied!",
-                description: "The ad link has been copied to your clipboard.",
+                title: "සබැඳිය පිටපත් කරන ලදී!",
+                description: "දැන්වීමේ සබැඳිය ඔබගේ ක්ලිප්බෝඩ් එකට පිටපත් කරන ලදී.",
             });
         });
     };
@@ -80,11 +80,11 @@ export default function AdDetailPage() {
     }
 
     if (error) {
-        return <div className="text-center py-12 text-destructive">Error loading ad: {error.message}</div>;
+        return <div className="text-center py-12 text-destructive">දැන්වීම පූරණය කිරීමේ දෝෂයකි: {error.message}</div>;
     }
 
     if (!ad) {
-        return <div className="text-center py-12 text-muted-foreground">Ad not found.</div>;
+        return <div className="text-center py-12 text-muted-foreground">දැන්වීම හමු නොවීය.</div>;
     }
     
     const postedAt = ad.createdAt?.toDate() 
@@ -92,7 +92,7 @@ export default function AdDetailPage() {
         : 'N/A';
         
     const adUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const shareText = `Check out this ad on AdZone Lanka: ${ad.title}`;
+    const shareText = `AdZone Lanka හි මෙම දැන්වීම බලන්න: ${ad.title}`;
 
     return (
         <div className="container mx-auto max-w-4xl py-12 px-4">
@@ -104,7 +104,7 @@ export default function AdDetailPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                     <Calendar className="w-4 h-4" />
-                    <span>Posted {postedAt}</span>
+                    <span>පළ කරන ලදී {postedAt}</span>
                 </div>
             </div>
 
@@ -129,20 +129,20 @@ export default function AdDetailPage() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-3xl text-primary">
                                 <Tag className="w-8 h-8" />
-                                <span>LKR {ad.price.toLocaleString()}</span>
+                                <span>රු. {ad.price.toLocaleString()}</span>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div>
-                                <h3 className="font-semibold flex items-center gap-2"><Phone className="w-5 h-5 text-muted-foreground"/>Contact</h3>
+                                <h3 className="font-semibold flex items-center gap-2"><Phone className="w-5 h-5 text-muted-foreground"/>සම්බන්ධ කරගන්න</h3>
                                 <p className="text-lg text-foreground">{ad.phoneNumber}</p>
                             </div>
                             <div>
-                                <h3 className="font-semibold flex items-center gap-2"><User className="w-5 h-5 text-muted-foreground"/>Seller Information</h3>
-                                <p className="text-muted-foreground">User ID: {ad.userId.substring(0,8)}...</p>
+                                <h3 className="font-semibold flex items-center gap-2"><User className="w-5 h-5 text-muted-foreground"/>විකුණුම්කරුගේ තොරතුරු</h3>
+                                <p className="text-muted-foreground">පරිශීලක ID: {ad.userId.substring(0,8)}...</p>
                             </div>
                              <div>
-                                <h3 className="font-semibold flex items-center gap-2"><Text className="w-5 h-5 text-muted-foreground"/>Category</h3>
+                                <h3 className="font-semibold flex items-center gap-2"><Text className="w-5 h-5 text-muted-foreground"/>ප්‍රවර්ගය</h3>
                                 <Badge variant="secondary">{ad.categoryId}</Badge>
                             </div>
                         </CardContent>
@@ -151,12 +151,12 @@ export default function AdDetailPage() {
             </div>
 
             <div className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">Description</h2>
+                <h2 className="text-2xl font-bold mb-4">විස්තරය</h2>
                 <p className="text-muted-foreground whitespace-pre-wrap">{ad.description}</p>
             </div>
             
             <div className="mt-8 border-t pt-6">
-                <h2 className="text-xl font-bold mb-4">Share this Ad</h2>
+                <h2 className="text-xl font-bold mb-4">මෙම දැන්වීම බෙදාගන්න</h2>
                 <div className="flex items-center gap-2">
                     <Button asChild variant="outline" size="icon">
                         <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(adUrl)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">

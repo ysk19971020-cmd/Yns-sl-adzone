@@ -88,7 +88,7 @@ export default function AdminLayout({
   
 
   if (isCheckingAdmin || isUserLoading) {
-    return <div className="flex h-screen items-center justify-center">Checking permissions...</div>;
+    return <div className="flex h-screen items-center justify-center">අවසර පරීක්ෂා කරමින්...</div>;
   }
   
   if (!isAdmin) {
@@ -108,50 +108,50 @@ export default function AdminLayout({
                 <SidebarGroup>
                   <SidebarMenu>
                     <SidebarMenuItem>
-                       <SidebarMenuButton asChild isActive={isActive('/admin')} tooltip="Dashboard">
+                       <SidebarMenuButton asChild isActive={isActive('/admin')} tooltip="පාලන පුවරුව">
                           <Link href="/admin">
                               <LayoutDashboard />
-                              Dashboard
+                              පාලන පුවරුව
                           </Link>
                        </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive('/admin/payments')} tooltip="Payments">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/payments')} tooltip="ගෙවීම්">
                         <Link href="/admin/payments">
                           <DollarSign />
-                          Payments
+                          ගෙවීම්
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                      <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive('/admin/ads')} tooltip="Ads">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/ads')} tooltip="දැන්වීම්">
                         <Link href="/admin/ads">
                           <ShoppingBag />
-                           Ads
+                           දැන්වීම්
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive('/admin/banners')} tooltip="Banners">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/banners')} tooltip="බැනර්">
                         <Link href="/admin/banners">
                           <ImageIcon />
-                           Banners
+                           බැනර්
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive('/admin/memberships')} tooltip="Memberships">
+                      <SidebarMenuButton asChild isActive={isActive('/admin/memberships')} tooltip="සාමාජිකත්ව">
                         <Link href="/admin/memberships">
                           <Star />
-                           Memberships
+                           සාමාජිකත්ව
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                      <SidebarMenuItem>
-                       <SidebarMenuButton asChild isActive={isActive('/admin/users')} tooltip="Users">
+                       <SidebarMenuButton asChild isActive={isActive('/admin/users')} tooltip="පරිශීලකයින්">
                          <Link href="/admin/users">
                           <Users />
-                          Users
+                          පරිශීලකයින්
                         </Link>
                        </SidebarMenuButton>
                     </SidebarMenuItem>
