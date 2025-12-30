@@ -12,12 +12,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/firebase';
-import { categories } from '@/lib/data';
+import { useUser, useFirestore } from '@/firebase';
+import { categories, pricingPlans } from '@/lib/data';
 import { districts } from '@/lib/districts';
 import { Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { v4 as uuidv4 } from 'uuid';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+
 
 // Classified Ad Schema
 const classifiedAdSchema = z.object({
@@ -27,6 +31,7 @@ const classifiedAdSchema = z.object({
     z.number().positive('Price must be a positive number')),
   categoryId: z.string({ required_error: 'Please select a category' }),
   district: z.string({ required_error: 'Please select a district' }),
+  phoneNumber: z.string().min(10, 'Please enter a valid phone number'),
   images: z.array(z.instanceof(File)).min(1, 'Please upload at least one image').max(5, 'You can upload a maximum of 5 images'),
 });
 type ClassifiedAdFormValues = z.infer<typeof classifiedAdSchema>;
@@ -51,6 +56,7 @@ type BannerAdFormValues = z.infer<typeof bannerAdSchema>;
 
 export default function PostAdPage() {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -111,32 +117,62 @@ export default function PostAdPage() {
   };
 
   const onClassifiedSubmit = async (data: ClassifiedAdFormValues) => {
-     // For classified ads, the payment is tied to membership, not individual posts.
-     // So we proceed to save the ad directly.
-     // We need to pass the data to a confirmation/payment page for MEMBERSHIP, or just post it if user has membership.
-     // For now, let's assume we proceed to a payment page for the "Silver" plan as a default.
-     // This logic will need to be more sophisticated later.
-     sessionStorage.setItem('tempAdData', JSON.stringify(data));
-     
-     const imageFiles = data.images;
-     const imagePromises = imageFiles.map(file => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-     });
+     setIsLoading(true);
+     if (!firestore || !user) {
+         toast({ variant: 'destructive', title: 'Error', description: 'User or database not ready.' });
+         setIsLoading(false);
+         return;
+     }
 
-     Promise.all(imagePromises).then(imageDataUris => {
-        sessionStorage.setItem('tempAdImages', JSON.stringify(imageDataUris));
-        // Redirecting to a generic payment page for a default membership plan
-        router.push('/payment/silver');
-        toast({
-            title: 'Confirm Ad & Plan',
-            description: 'Please complete the payment for the Silver plan to post your ad.',
+     try {
+        const storage = getStorage();
+        const imageUrls: string[] = [];
+
+        for (const image of data.images) {
+             const fileExtension = image.name.split('.').pop();
+             const fileName = `ad_images/${user.uid}/${uuidv4()}.${fileExtension}`;
+             const storageRef = ref(storage, fileName);
+             
+             const reader = new FileReader();
+             const uploadPromise = new Promise<string>((resolve, reject) => {
+                 reader.onload = async (e) => {
+                     try {
+                         const dataUrl = e.target?.result as string;
+                         await uploadString(storageRef, dataUrl, 'data_url');
+                         const downloadUrl = await getDownloadURL(storageRef);
+                         resolve(downloadUrl);
+                     } catch(err) {
+                         reject(err);
+                     }
+                 };
+                 reader.readAsDataURL(image);
+             });
+             imageUrls.push(await uploadPromise);
+        }
+        
+        await addDoc(collection(firestore, 'ads'), {
+            id: uuidv4(),
+            userId: user.uid,
+            title: data.title,
+            description: data.description,
+            price: data.price,
+            categoryId: data.categoryId,
+            district: data.district,
+            phoneNumber: data.phoneNumber,
+            imageUrls: imageUrls,
+            createdAt: serverTimestamp(),
+            status: 'active' // Or 'pending' if you want admin approval for ads
         });
-     });
+        
+        toast({ title: 'Success!', description: 'Your ad has been posted successfully.' });
+        router.push('/');
+
+     } catch(error: any) {
+        console.error("Ad posting error:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to post ad. ' + error.message });
+     } finally {
+        setIsLoading(false);
+     }
   };
 
   // Handlers for Banner Ad Form
@@ -190,7 +226,7 @@ export default function PostAdPage() {
                     <TabsTrigger value="banner">Banner Ad</TabsTrigger>
                 </TabsList>
                 <TabsContent value="classified">
-                   <p className="text-sm text-muted-foreground my-4">Post items, properties, or services. Requires a membership plan to post.</p>
+                   <p className="text-sm text-muted-foreground my-4">Post items, properties, or services. Requires an active membership plan to be visible.</p>
                    <Form {...classifiedForm}>
                         <form onSubmit={classifiedForm.handleSubmit(onClassifiedSubmit)} className="space-y-8">
                             <FormField control={classifiedForm.control} name="title" render={({ field }) => (
@@ -224,13 +260,22 @@ export default function PostAdPage() {
                                 )}/>
                             </div>
                             
-                            <FormField control={classifiedForm.control} name="price" render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Price (LKR)</FormLabel>
-                                <FormControl><Input type="number" placeholder="Enter price" {...field} /></FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )} />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <FormField control={classifiedForm.control} name="price" render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Price (LKR)</FormLabel>
+                                    <FormControl><Input type="number" placeholder="Enter price" {...field} /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <FormField control={classifiedForm.control} name="phoneNumber" render={({ field }) => (
+                                    <FormItem>
+                                    <FormLabel>Contact Number</FormLabel>
+                                    <FormControl><Input type="tel" placeholder="e.g., 0771234567" {...field} /></FormControl>
+                                    <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
 
                             <FormField control={classifiedForm.control} name="description" render={({ field }) => (
                                 <FormItem>
@@ -267,7 +312,7 @@ export default function PostAdPage() {
                             )} />
 
                             <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                                {isLoading ? 'Processing...' : 'Proceed to Choose Plan'}
+                                {isLoading ? 'Posting Ad...' : 'Post Ad'}
                             </Button>
                         </form>
                     </Form>

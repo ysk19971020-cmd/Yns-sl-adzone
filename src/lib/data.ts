@@ -5,13 +5,13 @@ export interface Ad {
   id: string;
   title: string;
   description: string;
-  category: '18-plus' | 'vehicles' | 'properties' | 'misc';
-  categoryName: string;
   price: number;
-  location: string;
-  imageUrl: string;
-  imageHint: string;
-  postedAt: string;
+  location: string; // district
+  imageUrls: string[];
+  categoryName: string; // From categoryId
+  postedAt: string; // from createdAt timestamp
+  userId: string;
+  categoryId: string;
 }
 
 export interface Category {
@@ -26,6 +26,7 @@ export interface PricingPlan {
     description: string;
     price: number;
     duration: string;
+    durationInMonths: number;
     features: string[];
 }
 
@@ -43,6 +44,7 @@ export const pricingPlans: PricingPlan[] = [
         description: '3 months of unlimited ads.',
         price: 1500,
         duration: '3 Months',
+        durationInMonths: 3,
         features: ['Unlimited Ads for 3 months', 'Standard ad visibility', 'Email support']
     },
     {
@@ -51,6 +53,7 @@ export const pricingPlans: PricingPlan[] = [
         description: '6 months of unlimited ads.',
         price: 3000,
         duration: '6 Months',
+        durationInMonths: 6,
         features: ['Unlimited Ads for 6 months', 'Enhanced ad visibility', 'Priority email support']
     },
     {
@@ -59,6 +62,7 @@ export const pricingPlans: PricingPlan[] = [
         description: '9 months of unlimited ads.',
         price: 6000,
         duration: '9 Months',
+        durationInMonths: 9,
         features: ['Unlimited Ads for 9 months', 'High ad visibility', '24/7 phone & email support']
     },
     {
@@ -67,6 +71,7 @@ export const pricingPlans: PricingPlan[] = [
         description: '1 year of unlimited ads + banner placement.',
         price: 15000,
         duration: '1 Year',
+        durationInMonths: 12,
         features: ['Unlimited Ads for 1 year', 'Top ad visibility', 'Includes Banner Ads', 'VIP support']
     }
 ];

@@ -1,9 +1,35 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection } from "firebase/firestore";
 import { DollarSign, ShoppingBag, Users } from "lucide-react";
 
 export default function AdminDashboard() {
+    const firestore = useFirestore();
+
+    const paymentsQuery = useMemoFirebase(
+        () => firestore ? collection(firestore, 'payments') : null,
+        [firestore]
+    );
+    const { data: payments } = useCollection<any>(paymentsQuery);
+    
+    const adsQuery = useMemoFirebase(
+        () => firestore ? collection(firestore, 'ads') : null,
+        [firestore]
+    );
+    const { data: ads } = useCollection<any>(adsQuery);
+
+    const usersQuery = useMemoFirebase(
+        () => firestore ? collection(firestore, 'users') : null,
+        [firestore]
+    );
+    const { data: users } = useCollection<any>(usersQuery);
+
+    const pendingPaymentsCount = payments?.filter(p => p.status === 'Pending').length || 0;
+    const activeAdsCount = ads?.length || 0;
+    const totalUsersCount = users?.length || 0;
+
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center">
@@ -28,7 +54,7 @@ export default function AdminDashboard() {
                                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">+12</div>
+                                <div className="text-2xl font-bold">{pendingPaymentsCount}</div>
                                 <p className="text-xs text-muted-foreground">
                                     payments require approval
                                 </p>
@@ -42,7 +68,7 @@ export default function AdminDashboard() {
                                 <ShoppingBag className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">+573</div>
+                                <div className="text-2xl font-bold">{activeAdsCount}</div>
                                 <p className="text-xs text-muted-foreground">
                                     currently live on the site
                                 </p>
@@ -54,7 +80,7 @@ export default function AdminDashboard() {
                                 <Users className="h-4 w-4 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">+2350</div>
+                                <div className="text-2xl font-bold">{totalUsersCount}</div>
                                 <p className="text-xs text-muted-foreground">
                                     users have signed up
                                 </p>

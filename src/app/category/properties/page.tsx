@@ -3,11 +3,23 @@
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ads } from '@/lib/data';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
 import Link from 'next/link';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PropertiesPage() {
-  const propertyAds = ads.filter(ad => ad.category === 'properties');
+    const firestore = useFirestore();
+
+    const adsQuery = useMemoFirebase(
+      () => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'ads'), where('categoryId', '==', 'properties'));
+      },
+      [firestore]
+    );
+
+    const { data: propertyAds, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
 
   return (
     <>
@@ -38,7 +50,19 @@ export default function PropertiesPage() {
             <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">ඔබේ ඉඩම් හා නිවාස දැන්වීම මෙහි පල කරන්න!</Link></h3>
         </div>
 
-        {propertyAds.length > 0 ? (
+        {isLoadingAds && (
+           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                    <Skeleton className="h-48 w-full" />
+                    <Skeleton className="h-6 w-5/6" />
+                    <Skeleton className="h-4 w-1/3" />
+                </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoadingAds && propertyAds && propertyAds.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {propertyAds.map((ad) => (
@@ -46,33 +70,35 @@ export default function PropertiesPage() {
               ))}
             </div>
             <div className="text-center mt-12">
-              <Button variant="outline" size="lg">Load More</Button>
+              <Button variant="outline" size="lg" disabled>Load More</Button>
             </div>
           </>
         ) : (
-          <Card className="mt-8">
-              <CardHeader>
-                  <CardTitle>No Ads Found</CardTitle>
-                  <CardDescription>
-                      There are currently no ads in the properties category.
-                  </CardDescription>
-              </CardHeader>
-              <CardContent>
-                   <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm p-8">
-                      <div className="flex flex-col items-center gap-1 text-center">
-                      <h3 className="text-2xl font-bold tracking-tight">
-                          Property ads will be displayed here
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                          Check back later to find the best deals on properties.
-                      </p>
-                      <Button asChild className="mt-4">
-                          <a href="/post-ad">Post an Ad</a>
-                      </Button>
-                      </div>
-                  </div>
-              </CardContent>
-          </Card>
+          !isLoadingAds && (
+            <Card className="mt-8">
+                <CardHeader>
+                    <CardTitle>No Ads Found</CardTitle>
+                    <CardDescription>
+                        There are currently no ads in the properties category.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm p-8">
+                        <div className="flex flex-col items-center gap-1 text-center">
+                        <h3 className="text-2xl font-bold tracking-tight">
+                            Property ads will be displayed here
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                            Check back later to find the best deals on properties.
+                        </p>
+                        <Button asChild className="mt-4">
+                            <a href="/post-ad">Post an Ad</a>
+                        </Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+          )
         )}
       </div>
     </>

@@ -4,24 +4,31 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge';
 import type { Ad } from '@/lib/data';
 import { MapPin, Tag } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+
 
 interface AdCardProps {
-  ad: Ad;
+  ad: any; // Using any for now as data comes directly from firestore
 }
 
 export function AdCard({ ad }: AdCardProps) {
+  const adId = ad.id;
+  const postedAt = ad.createdAt?.toDate() 
+    ? formatDistanceToNow(ad.createdAt.toDate(), { addSuffix: true }) 
+    : 'recently';
+  
   return (
-    <Link href={`/ad/${ad.id}`}>
+    <Link href={`/ad/${adId}`}>
       <Card className="overflow-hidden h-full flex flex-col group transition-all hover:shadow-lg">
         <CardHeader className="p-0">
           <div className="relative aspect-[4/3] w-full overflow-hidden">
             <Image
-              src={ad.imageUrl}
+              src={ad.imageUrls?.[0] || 'https://placehold.co/400x300?text=No+Image'}
               alt={ad.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <Badge variant="secondary" className="absolute top-2 right-2">{ad.categoryName}</Badge>
+            <Badge variant="secondary" className="absolute top-2 right-2 capitalize">{ad.categoryId}</Badge>
           </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">
@@ -30,7 +37,7 @@ export function AdCard({ ad }: AdCardProps) {
           </h3>
           <div className="mt-2 flex items-center text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 mr-1.5" />
-            <span>{ad.location}</span>
+            <span>{ad.district}</span>
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0">
@@ -39,7 +46,7 @@ export function AdCard({ ad }: AdCardProps) {
               <Tag className="h-5 w-5 mr-1.5" />
               <span>LKR {ad.price.toLocaleString()}</span>
             </div>
-            <span className="text-xs text-muted-foreground">{ad.postedAt}</span>
+            <span className="text-xs text-muted-foreground">{postedAt}</span>
           </div>
         </CardFooter>
       </Card>

@@ -1,12 +1,30 @@
+'use client';
+
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { categories, ads } from '@/lib/data';
+import { categories } from '@/lib/data';
 import { Search, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import type { Icon as LucideIcon } from 'lucide-react';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, limit, query } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const firestore = useFirestore();
+
+  const adsQuery = useMemoFirebase(
+    () => {
+      if (!firestore) return null;
+      return query(collection(firestore, 'ads'), limit(8));
+    },
+    [firestore]
+  );
+  
+  const { data: ads, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
+
+
   return (
     <>
       {/* Homepage Banners */}
@@ -77,6 +95,9 @@ export default function Home() {
                 );
               })}
             </div>
+             <div className="my-8 p-6 bg-accent/20 rounded-lg text-center mt-12">
+               <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">Post Your Ad Here!</Link></h3>
+            </div>
           </div>
         </section>
 
@@ -85,7 +106,18 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-center font-headline mb-8 add-your-ad text-foreground">
               නවතම දැන්වීම්
             </h2>
-            {ads.length > 0 ? (
+             {isLoadingAds && (
+               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="space-y-2">
+                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="h-6 w-5/6" />
+                        <Skeleton className="h-4 w-1/3" />
+                    </div>
+                ))}
+              </div>
+            )}
+            {!isLoadingAds && ads && ads.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {ads.map((ad) => (
@@ -93,13 +125,15 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="text-center mt-12">
-                  <Button variant="outline" size="lg">View More Ads</Button>
+                  <Button variant="outline" size="lg" disabled>View More Ads</Button>
                 </div>
               </>
             ) : (
-              <div className="text-center text-muted-foreground py-16">
-                <p>No ads posted yet. Be the first!</p>
-              </div>
+             !isLoadingAds && (
+                <div className="text-center text-muted-foreground py-16">
+                  <p>No ads posted yet. Be the first!</p>
+                </div>
+              )
             )}
           </div>
         </section>
