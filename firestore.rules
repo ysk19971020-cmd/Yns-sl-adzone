@@ -77,7 +77,7 @@ service cloud.firestore {
     match /ads/{adId} {
       allow get, list: if true;
       allow create: if isCreatingOwner();
-      allow update: if isOwner(resource.data.userId) && isFieldUnchanged('userId') && isFieldUnchanged('adId');
+      allow update: if isOwner(resource.data.userId) && isFieldUnchanged('userId') && isFieldUnchanged('id');
       allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
 
