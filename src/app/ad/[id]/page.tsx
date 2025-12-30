@@ -1,15 +1,17 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, collection } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import Image from 'next/image';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Tag, Phone, User, Calendar, Text } from 'lucide-react';
+import { MapPin, Tag, Phone, User, Calendar, Text, Share2, Copy } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 function AdDetailSkeleton() {
     return (
@@ -51,6 +53,8 @@ function AdDetailSkeleton() {
 export default function AdDetailPage() {
     const { id } = useParams();
     const firestore = useFirestore();
+    const pathname = usePathname();
+    const { toast } = useToast();
 
     const adId = Array.isArray(id) ? id[0] : id;
 
@@ -60,6 +64,16 @@ export default function AdDetailPage() {
     }, [firestore, adId]);
 
     const { data: ad, isLoading, error } = useDoc<any>(adRef);
+    
+    const handleCopyLink = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            toast({
+                title: "Link Copied!",
+                description: "The ad link has been copied to your clipboard.",
+            });
+        });
+    };
 
     if (isLoading) {
         return <AdDetailSkeleton />;
@@ -76,6 +90,9 @@ export default function AdDetailPage() {
     const postedAt = ad.createdAt?.toDate() 
         ? formatDistanceToNow(ad.createdAt.toDate(), { addSuffix: true }) 
         : 'N/A';
+        
+    const adUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareText = `Check out this ad on AdZone Lanka: ${ad.title}`;
 
     return (
         <div className="container mx-auto max-w-4xl py-12 px-4">
@@ -136,6 +153,30 @@ export default function AdDetailPage() {
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">Description</h2>
                 <p className="text-muted-foreground whitespace-pre-wrap">{ad.description}</p>
+            </div>
+            
+            <div className="mt-8 border-t pt-6">
+                <h2 className="text-xl font-bold mb-4">Share this Ad</h2>
+                <div className="flex items-center gap-2">
+                    <Button asChild variant="outline" size="icon">
+                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(adUrl)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        </a>
+                    </Button>
+                     <Button asChild variant="outline" size="icon">
+                        <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(adUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-2.1 2.1c-1.1 1.1-2.2 2.3-2.3 2.4s-1.2 1.1-2.2 1.1c-.8 0-1.1-1.1-1.1-1.1s-1.1-1.1-2.3-1.1c-1.1 0-2.1 1.1-2.1 1.1s-1.1 1.1-2.3 1.1c-1 0-2.1-1.1-2.1-1.1s-1.1-1-2.2-1.1c-1.1 0-2.1 1.1-2.1 1.1s-.7-1.1-1.1-1.1c-.3 0-1.1.2-1.1.2s-2.1-1-2.8-2.2c-.8-1.1-1.1-2.2-1.1-2.2s.3-1.1 1.1-2.2c.8-1.2 2.2-2.3 2.2-2.3s1.2 1.1 2.3 2.3c1.1 1.1 2.3 2.3 3.4 2.3s2.3-2.3 2.3-2.3l.2-.2s1.1 1.1 2.3 1.1c1.1 0 2.2-1.1 2.2-1.1s1.1-1.1 2.3-1.1c.9 0 1.9.6 1.9.6s-1.1-2.1-2.2-3.2c-1.1-1.1-2.3-2.3-3.4-2.3s-2.3 1.1-2.3 1.1l-.2.2s-1.1-1.1-2.3-1.1c-1.1 0-2.2 1.1-2.2 1.1s-1.1 1-2.3 1.1c-.9 0-1.9-.6-1.9-.6s1.1 2.1 2.2 3.2c1.1 1.1 2.3 2.3 3.4 2.3s2.3-1.1 2.3-1.1l.2-.2s1.1 1.1 2.3 1.1c1.1 0 2.2-1.1 2.2-1.1s1.1-1.1 2.3-1.1c.9 0 1.9.6 1.9.6s-1.1-2.1-2.2-3.2c-1.1-1.1-2.3-2.3-3.4-2.3s-2.3 1.1-2.3 1.1l-.2.2s-1.1-1.1-2.3-1.1c-1.1 0-2.2 1.1-2.2 1.1z"/></svg>
+                        </a>
+                    </Button>
+                     <Button asChild variant="outline" size="icon">
+                        <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + adUrl)}`} data-action="share/whatsapp/share" target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="h-5 w-5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        </a>
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={handleCopyLink} aria-label="Copy Link">
+                        <Copy className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
         </div>
     );
