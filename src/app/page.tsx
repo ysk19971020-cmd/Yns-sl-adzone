@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,16 +14,33 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
   const firestore = useFirestore();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [locationTerm, setLocationTerm] = useState('');
 
   const adsQuery = useMemoFirebase(
     () => {
       if (!firestore) return null;
-      return query(collection(firestore, 'ads'), limit(8));
+      // Fetch more ads initially to allow for effective client-side filtering
+      return query(collection(firestore, 'ads'), limit(50));
     },
     [firestore]
   );
   
-  const { data: ads, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
+  const { data: allAds, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
+
+  const filteredAds = useMemoFirebase(() => {
+    return (allAds || [])
+      .filter(ad => {
+        const titleMatch = searchTerm.toLowerCase() 
+          ? ad.title.toLowerCase().includes(searchTerm.toLowerCase()) 
+          : true;
+        const locationMatch = locationTerm.toLowerCase()
+          ? ad.district.toLowerCase().includes(locationTerm.toLowerCase())
+          : true;
+        return titleMatch && locationMatch;
+      })
+      .slice(0, 8); // Limit to 8 after filtering
+  }, [allAds, searchTerm, locationTerm]);
 
 
   return (
@@ -57,6 +75,8 @@ export default function Home() {
                   type="text"
                   placeholder="What are you looking for?"
                   className="pl-10 w-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="relative flex-grow w-full">
@@ -65,9 +85,11 @@ export default function Home() {
                   type="text"
                   placeholder="Location (e.g., Colombo)"
                   className="pl-10 w-full"
+                  value={locationTerm}
+                  onChange={(e) => setLocationTerm(e.target.value)}
                 />
               </div>
-              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90">
+              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90" onClick={() => { /* Search logic is now based on state change */ }}>
                 <Search className="mr-2" />
                 Search
               </Button>
@@ -117,10 +139,10 @@ export default function Home() {
                 ))}
               </div>
             )}
-            {!isLoadingAds && ads && ads.length > 0 ? (
+            {!isLoadingAds && filteredAds && filteredAds.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {ads.map((ad) => (
+                  {filteredAds.map((ad) => (
                     <AdCard key={ad.id} ad={ad} />
                   ))}
                 </div>
@@ -131,7 +153,7 @@ export default function Home() {
             ) : (
              !isLoadingAds && (
                 <div className="text-center text-muted-foreground py-16">
-                  <p>No ads posted yet. Be the first!</p>
+                  <p>No ads found for your search.</p>
                 </div>
               )
             )}

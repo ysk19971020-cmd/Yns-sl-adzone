@@ -64,6 +64,10 @@
           "type": "string",
           "description": "Reference to the ad category."
         },
+        "subCategoryId": {
+            "type": "string",
+            "description": "Reference to the ad sub-category (especially for 18+)."
+        },
         "district": {
           "type": "string",
           "description": "The district where the item is located."
@@ -419,4 +423,3 @@
     "reasoning": "The data model is structured to support the core features of the AdZone Lanka application, including memberships, banner ads, and various interactions like comments and likes. A key principle is denormalizing the `userId` field into most documents to allow for independent and efficient security rule enforcement without needing expensive `get()` calls. Collections are segregated by data type for clear, maintainable rules. Public content like ads and categories is world-readable, while user-specific data like memberships and payments is private. Write access is strictly controlled, generally limited to the document owner or, in the case of system-level data (categories, banner approvals), disallowed from the client entirely."
   }
 }
-    

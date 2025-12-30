@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
-import { categories, pricingPlans } from '@/lib/data';
+import { categories } from '@/lib/data';
 import { districts } from '@/lib/districts';
+import { subCategories18Plus } from '@/lib/18-plus-categories';
 import { Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,9 +31,18 @@ const classifiedAdSchema = z.object({
   price: z.preprocess((a) => parseInt(z.string().parse(a), 10), 
     z.number().positive('Price must be a positive number')),
   categoryId: z.string({ required_error: 'Please select a category' }),
+  subCategoryId: z.string().optional(),
   district: z.string({ required_error: 'Please select a district' }),
   phoneNumber: z.string().min(10, 'Please enter a valid phone number'),
   images: z.array(z.instanceof(File)).min(1, 'Please upload at least one image').max(5, 'You can upload a maximum of 5 images'),
+}).refine(data => {
+    if (data.categoryId === '18-plus') {
+        return !!data.subCategoryId;
+    }
+    return true;
+}, {
+    message: 'Please select an 18+ sub-category',
+    path: ['subCategoryId'],
 });
 type ClassifiedAdFormValues = z.infer<typeof classifiedAdSchema>;
 
@@ -73,7 +83,8 @@ export default function PostAdPage() {
   const bannerForm = useForm<BannerAdFormValues>({
     resolver: zodResolver(bannerAdSchema),
   });
-
+  
+  const selectedMainCategory = classifiedForm.watch('categoryId');
   const bannerDuration = bannerForm.watch('duration');
 
   useEffect(() => {
@@ -157,6 +168,7 @@ export default function PostAdPage() {
             description: data.description,
             price: data.price,
             categoryId: data.categoryId,
+            subCategoryId: data.subCategoryId || null,
             district: data.district,
             phoneNumber: data.phoneNumber,
             imageUrls: imageUrls,
@@ -248,6 +260,21 @@ export default function PostAdPage() {
                                     <FormMessage />
                                 </FormItem>
                                 )} />
+                                {selectedMainCategory === '18-plus' && (
+                                    <FormField control={classifiedForm.control} name="subCategoryId" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>18+ Sub-Category</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a sub-category" /></SelectTrigger></FormControl>
+                                        <SelectContent>{subCategories18Plus.map(cat => (<SelectItem key={cat.slug} value={cat.slug}>{cat.name}</SelectItem>))}</SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )} />
+                                )}
+                            </div>
+
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <FormField control={classifiedForm.control} name="district" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>District</FormLabel>
@@ -258,24 +285,22 @@ export default function PostAdPage() {
                                     <FormMessage />
                                 </FormItem>
                                 )}/>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <FormField control={classifiedForm.control} name="price" render={({ field }) => (
+                                 <FormField control={classifiedForm.control} name="price" render={({ field }) => (
                                     <FormItem>
                                     <FormLabel>Price (LKR)</FormLabel>
                                     <FormControl><Input type="number" placeholder="Enter price" {...field} /></FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField control={classifiedForm.control} name="phoneNumber" render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel>Contact Number</FormLabel>
-                                    <FormControl><Input type="tel" placeholder="e.g., 0771234567" {...field} /></FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )} />
                             </div>
+                            
+                            <FormField control={classifiedForm.control} name="phoneNumber" render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Contact Number</FormLabel>
+                                <FormControl><Input type="tel" placeholder="e.g., 0771234567" {...field} /></FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )} />
 
                             <FormField control={classifiedForm.control} name="description" render={({ field }) => (
                                 <FormItem>

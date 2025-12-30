@@ -1,19 +1,32 @@
-
 'use client';
 
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { collection, query, where } from 'firebase/firestore';
+import { collection, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { AdCard } from '@/components/ad-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Trash2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function MyAdsPage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -30,6 +43,24 @@ export default function MyAdsPage() {
   );
 
   const { data: userAds, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
+
+  const handleDelete = async (adId: string) => {
+    if (!firestore) return;
+    try {
+      await deleteDoc(doc(firestore, 'ads', adId));
+      toast({
+        title: 'Ad Deleted',
+        description: 'Your ad has been successfully deleted.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete ad: ' + error.message,
+      });
+    }
+  };
+
 
   if (isUserLoading || !user) {
     return (
@@ -73,7 +104,28 @@ export default function MyAdsPage() {
           {!isLoadingAds && userAds && userAds.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {userAds.map((ad: any) => (
-                <AdCard key={ad.id} ad={ad} />
+                <div key={ad.id} className="relative group">
+                  <AdCard ad={ad} />
+                   <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                         <Button variant="destructive" size="icon" className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Trash2 className="h-4 w-4"/>
+                          </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure you want to delete this ad?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your ad "{ad.title}".
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(ad.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                </div>
               ))}
             </div>
           ) : (
@@ -94,4 +146,3 @@ export default function MyAdsPage() {
     </div>
   );
 }
-
