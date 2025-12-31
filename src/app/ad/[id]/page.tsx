@@ -92,7 +92,7 @@ export default function AdDetailPage() {
         : 'N/A';
         
     const adUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const shareText = `AdZone Lanka හි මෙම දැන්වීම බලන්න: ${ad.title}`;
+    const shareText = `YNS SL ADZONE හි මෙම දැන්වීම බලන්න: ${ad.title}`;
 
     return (
         <div className="container mx-auto max-w-4xl py-12 px-4">

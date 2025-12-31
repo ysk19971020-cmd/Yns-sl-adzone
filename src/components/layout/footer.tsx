@@ -37,7 +37,7 @@ export function Footer({ className }: { className?: string }) {
           </div>
         </div>
         <div className="mt-8 border-t pt-4 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} AdZone Lanka. සියලුම හිමිකම් ඇවිරිණි.</p>
+          <p>&copy; {new Date().getFullYear()} YNS SL ADZONE. සියලුම හිමිකම් ඇවිරිණි.</p>
         </div>
       </div>
     </footer>

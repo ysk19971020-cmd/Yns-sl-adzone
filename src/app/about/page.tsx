@@ -5,7 +5,7 @@ export default function AboutPage() {
   return (
     <div className="container mx-auto max-w-4xl py-12 md:py-24 px-4">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">AdZone Lanka ගැන</h1>
+        <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground">YNS SL ADZONE ගැන</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           ශ්‍රී ලංකාවේ වේගයෙන්ම වර්ධනය වන වර්ගීකෘත දැන්වීම් වේදිකාව.
         </p>
@@ -30,7 +30,7 @@ export default function AboutPage() {
         <div>
           <h2 className="text-3xl font-bold mb-4 text-primary">අපගේ දැක්ම</h2>
           <p className="text-muted-foreground leading-relaxed">
-            AdZone Lanka ශ්‍රී ලංකාවේ වර්ගීකෘත දැන්වීම් සඳහා අංක එකේ ගමනාන්තය බවට පත් කිරීම අපගේ දැක්මයි. එහි පුළුල් ප්‍රවේශය, විශ්වසනීයත්වය සහ නවෝත්පාදනය සඳහා ප්‍රසිද්ධියට පත්වීම අපගේ අරමුණයි. අපගේ පරිශීලකයින්ගේ විකාශනය වන අවශ්‍යතා සපුරාලීමට සහ දේශීය ආර්ථිකයට ධනාත්මකව දායක වීමට අපගේ වේදිකාව අඛණ්ඩව වැඩිදියුණු කිරීමට අපි කැපවී සිටිමු.
+            YNS SL ADZONE ශ්‍රී ලංකාවේ වර්ගීකෘත දැන්වීම් සඳහා අංක එකේ ගමනාන්තය බවට පත් කිරීම අපගේ දැක්මයි. එහි පුළුල් ප්‍රවේශය, විශ්වසනීයත්වය සහ නවෝත්පාදනය සඳහා ප්‍රසිද්ධියට පත්වීම අපගේ අරමුණයි. අපගේ පරිශීලකයින්ගේ විකාශනය වන අවශ්‍යතා සපුරාලීමට සහ දේශීය ආර්ථිකයට ධනාත්මකව දායක වීමට අපගේ වේදිකාව අඛණ්ඩව වැඩිදියුණු කිරීමට අපි කැපවී සිටිමු.
           </p>
         </div>
       </div>
