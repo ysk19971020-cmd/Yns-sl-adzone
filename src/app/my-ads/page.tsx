@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { collection, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { AdCard } from '@/components/ad-card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import Link from 'next/link';
 
 export default function MyAdsPage() {
   const { user, isUserLoading } = useUser();
@@ -106,25 +107,32 @@ export default function MyAdsPage() {
               {userAds.map((ad: any) => (
                 <div key={ad.id} className="relative group">
                   <AdCard ad={ad} />
-                   <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                         <Button variant="destructive" size="icon" className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Trash2 className="h-4 w-4"/>
-                          </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>ඔබට මෙම දැන්වීම මැකීමට අවශ්‍ය බව විශ්වාසද?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. මෙය ඔබගේ "{ad.title}" දැන්වීම ස්ථිරවම මකා දමනු ඇත.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>අවලංගු කරන්න</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(ad.id)}>මකන්න</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                   <div className="absolute top-2 right-2 z-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <Button asChild variant="secondary" size="icon">
+                       <Link href={`/edit-ad/${ad.id}`}>
+                         <Edit className="h-4 w-4"/>
+                       </Link>
+                     </Button>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                           <Button variant="destructive" size="icon">
+                              <Trash2 className="h-4 w-4"/>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>ඔබට මෙම දැන්වීම මැකීමට අවශ්‍ය බව විශ්වාසද?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              මෙම ක්‍රියාව ආපසු හැරවිය නොහැක. මෙය ඔබගේ "{ad.title}" දැන්වීම ස්ථිරවම මකා දමනු ඇත.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>අවලංගු කරන්න</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(ad.id)}>මකන්න</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                   </div>
                 </div>
               ))}
             </div>

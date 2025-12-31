@@ -8,10 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid'; 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -26,7 +25,6 @@ function PaymentBannerComponent() {
     const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
     const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState("manual");
     
     // Read banner details from URL
     const description = searchParams.get('description');
@@ -88,10 +86,11 @@ function PaymentBannerComponent() {
 
         try {
             const storage = getStorage();
+            const bannerId = uuidv4();
 
             // 1. Upload banner image to Storage
             const bannerImageExt = bannerImageDataUri.split(';')[0].split('/')[1];
-            const bannerImageName = `banner_images/${user.uid}/${uuidv4()}.${bannerImageExt}`;
+            const bannerImageName = `banner_images/${user.uid}/${bannerId}.${bannerImageExt}`;
             const bannerStorageRef = ref(storage, bannerImageName);
             await uploadString(bannerStorageRef, bannerImageDataUri, 'data_url');
             const bannerImageUrl = await getDownloadURL(bannerStorageRef);
@@ -109,10 +108,8 @@ function PaymentBannerComponent() {
                     await uploadString(slipStorageRef, slipDataUrl, 'data_url');
                     const paymentSlipUrl = await getDownloadURL(slipStorageRef);
                     
-                    const bannerId = uuidv4();
-
                     // 3. Create Banner document
-                    await addDoc(collection(firestore, 'banners'), {
+                    await setDoc(doc(firestore, 'banners', bannerId), {
                         id: bannerId,
                         userId: user.uid,
                         imageUrl: bannerImageUrl,
@@ -134,7 +131,7 @@ function PaymentBannerComponent() {
                         amount: Number(price),
                         paymentSlipUrl: paymentSlipUrl,
                         status: 'Pending',
-                        targetId: bannerId,
+                        targetId: bannerId, // Link payment to the banner
                         paymentFor: 'Banner',
                         createdAt: serverTimestamp(),
                     });
@@ -173,16 +170,6 @@ function PaymentBannerComponent() {
         }
     };
     
-    const handleCardSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        toast({
-            title: "ළඟදීම!",
-            description: "කාඩ්පත් ගෙවීම් තවමත් නොමැත. කරුණාකර දැනට අතින් ගෙවීමේ ක්‍රමයක් භාවිතා කරන්න.",
-            variant: "default",
-        });
-    }
-
-
     return (
         <div className="container mx-auto max-w-2xl py-12">
             <Card>
@@ -198,104 +185,72 @@ function PaymentBannerComponent() {
                         <div className="flex justify-between text-lg"><span className="text-muted-foreground">සම්පූර්ණ:</span> <span className="font-bold text-primary">රු. {Number(price).toLocaleString()}</span></div>
                     </div>
 
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="manual">බැංකු/අතින් මාරු කිරීම</TabsTrigger>
-                            <TabsTrigger value="card">කාඩ්පත් ගෙවීම</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="manual" className="pt-6">
-                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                                <h3 className="font-semibold text-lg mb-3">ගෙවීම් උපදෙස්</h3>
-                                <p className="text-sm text-muted-foreground mb-4">කරුණාකර පහත ක්‍රම වලින් එකක් භාවිතා කර රු. {Number(price).toLocaleString()} ක ගෙවීමක් කරන්න.</p>
+                     <div>
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h3 className="font-semibold text-lg mb-3">ගෙවීම් උපදෙස්</h3>
+                            <p className="text-sm text-muted-foreground mb-4">කරුණාකර පහත ක්‍රම වලින් එකක් භාවිතා කර රු. {Number(price).toLocaleString()} ක ගෙවීමක් කරන්න.</p>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">1. බැංකු මාරු කිරීම</h4>
+                                    <ul className="mt-1 text-sm space-y-1 pl-4 list-disc list-inside">
+                                        <li><strong>බැංකුව:</strong> සම්පත් බැංකුව</li>
+                                        <li><strong>ගිණුමේ නම:</strong> J A Y S Kavinada</li>
+                                        <li><strong>ගිණුම් අංකය:</strong> 121212121212</li>
+                                        <li><strong>ශාඛාව:</strong> කළුතර</li>
+                                    </ul>
+                                </div>
                                 
-                                <div className="space-y-4">
-                                    <div>
-                                        <h4 className="font-semibold">1. බැංකු මාරු කිරීම</h4>
-                                        <ul className="mt-1 text-sm space-y-1 pl-4 list-disc list-inside">
-                                            <li><strong>බැංකුව:</strong> සම්පත් බැංකුව</li>
-                                            <li><strong>ගිණුමේ නම:</strong> J A Y S Kavinada</li>
-                                            <li><strong>ගිණුම් අංකය:</strong> 121212121212</li>
-                                            <li><strong>ශාඛාව:</strong> කළුතර</li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <div>
-                                        <h4 className="font-semibold">2. eZ Cash</h4>
-                                        <p className="mt-1 text-sm">අංකයට යවන්න: <strong>0771248610</strong></p>
-                                    </div>
-
-                                    <div>
-                                        <h4 className="font-semibold">3. Genie</h4>
-                                        <p className="mt-1 text-sm">අංකයට යවන්න: <strong>0771248610</strong></p>
-                                    </div>
+                                <div>
+                                    <h4 className="font-semibold">2. eZ Cash</h4>
+                                    <p className="mt-1 text-sm">අංකයට යවන්න: <strong>0771248610</strong></p>
                                 </div>
 
-                                 <p className="text-xs text-muted-foreground mt-4">බැංකු මාරු කිරීම් සඳහා, කරුණාකර ඔබගේ දුරකථන අංකය විමර්ශන අංකය ලෙස භාවිතා කරන්න. ගෙවීමෙන් පසු, පහතින් පත්‍රිකාව උඩුගත කරන්න.</p>
-                            </div>
-
-                             <Alert className="mt-6">
-                                <Info className="h-4 w-4" />
-                                <AlertTitle>වැදගත් සටහන</AlertTitle>
-                                <AlertDescription>
-                                මෙය අතින් තහවුරු කිරීමේ ක්‍රියාවලියකි. අපගේ පරිපාලක කණ්ඩායම ඔබගේ ගෙවීම සමාලෝචනය කර අනුමත කිරීමෙන් පසු ඔබගේ බැනර් දැන්වීම සක්‍රිය වනු ඇත.
-                                </AlertDescription>
-                            </Alert>
-
-                            <div className="space-y-4 mt-6">
-                                <Label>භාවිතා කළ ගෙවීම් ක්‍රමය තෝරන්න</Label>
-                                <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="Bank Transfer" id="bank" />
-                                        <Label htmlFor="bank">බැංකු මාරු කිරීම</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="eZ Cash" id="ezcash" />
-                                        <Label htmlFor="ezcash">eZ Cash</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="Dialog Genie" id="genie" />
-                                        <Label htmlFor="genie">Dialog Genie</Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-
-                            <div className="space-y-2 mt-6">
-                                <Label htmlFor="payment-slip">ගෙවීම් පත්‍රිකාව උඩුගත කරන්න</Label>
-                                <Input id="payment-slip" type="file" accept="image/*" onChange={handleFileChange} />
-                                <p className="text-xs text-muted-foreground">කරුණාකර ඔබගේ බැංකු පත්‍රිකාවේ හෝ ගනුදෙනු රිසිට්පතේ පැහැදිලි ඡායාරූපයක් උඩුගත කරන්න.</p>
-                            </div>
-
-                            <Button onClick={handleManualSubmit} disabled={isLoading || !paymentSlip} className="w-full mt-6" size="lg">
-                                {isLoading ? 'ඉදිරිපත් කරමින්...' : `රු. ${Number(price).toLocaleString()} ගෙවීම ඉදිරිපත් කරන්න`}
-                            </Button>
-                        </TabsContent>
-                        <TabsContent value="card" className="pt-6">
-                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                                <h3 className="font-semibold text-lg">ළඟදීම!</h3>
-                                <p className="text-sm text-muted-foreground mt-1">මාර්ගගත කාඩ්පත් ගෙවීම් ટૂંક સમયમાં ઉપલબ્ધ થશે.</p>
-                           </div>
-                           <form onSubmit={handleCardSubmit} className="space-y-4 mt-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="card-number">කාඩ්පත් අංකය</Label>
-                                    <Input id="card-number" placeholder="•••• •••• •••• ••••" disabled />
+                                <div>
+                                    <h4 className="font-semibold">3. Genie</h4>
+                                    <p className="mt-1 text-sm">අංකයට යවන්න: <strong>0771248610</strong></p>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="expiry-date">කල් ඉකුත්වන දිනය</Label>
-                                        <Input id="expiry-date" placeholder="MM / YY" disabled />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="cvc">CVC</Label>
-                                        <Input id="cvc" placeholder="•••" disabled />
-                                    </div>
+                            </div>
+
+                             <p className="text-xs text-muted-foreground mt-4">බැංකු මාරු කිරීම් සඳහා, කරුණාකර ඔබගේ දුරකථන අංකය විමර්ශන අංකය ලෙස භාවිතා කරන්න. ගෙවීමෙන් පසු, පහතින් පත්‍රිකාව උඩුගත කරන්න.</p>
+                        </div>
+
+                         <Alert className="mt-6">
+                            <Info className="h-4 w-4" />
+                            <AlertTitle>වැදගත් සටහන</AlertTitle>
+                            <AlertDescription>
+                            මෙය අතින් තහවුරු කිරීමේ ක්‍රියාවලියකි. අපගේ පරිපාලක කණ්ඩායම ඔබගේ ගෙවීම සමාලෝචනය කර අනුමත කිරීමෙන් පසු ඔබගේ බැනර් දැන්වීම සක්‍රිය වනු ඇත.
+                            </AlertDescription>
+                        </Alert>
+
+                        <div className="space-y-4 mt-6">
+                            <Label>භාවිතා කළ ගෙවීම් ක්‍රමය තෝරන්න</Label>
+                            <RadioGroup defaultValue={paymentMethod} onValueChange={setPaymentMethod} className="flex space-x-4">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Bank Transfer" id="bank" />
+                                    <Label htmlFor="bank">බැංකු මාරු කිරීම</Label>
                                 </div>
-                                <Button type="submit" className="w-full" size="lg" disabled>
-                                    <CreditCard className="mr-2 h-4 w-4" />
-                                    රු. {Number(price).toLocaleString()} ආරක්ෂිතව ගෙවන්න
-                                </Button>
-                           </form>
-                        </TabsContent>
-                    </Tabs>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="eZ Cash" id="ezcash" />
+                                    <Label htmlFor="ezcash">eZ Cash</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Dialog Genie" id="genie" />
+                                    <Label htmlFor="genie">Dialog Genie</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+
+                        <div className="space-y-2 mt-6">
+                            <Label htmlFor="payment-slip">ගෙවීම් පත්‍රිකාව උඩුගත කරන්න</Label>
+                            <Input id="payment-slip" type="file" accept="image/*" onChange={handleFileChange} />
+                            <p className="text-xs text-muted-foreground">කරුණාකර ඔබගේ බැංකු පත්‍රිකාවේ හෝ ගනුදෙනු රිසිට්පතේ පැහැදිලි ඡායාරූපයක් උඩුගත කරන්න.</p>
+                        </div>
+
+                        <Button onClick={handleManualSubmit} disabled={isLoading || !paymentSlip} className="w-full mt-6" size="lg">
+                            {isLoading ? 'ඉදිරිපත් කරමින්...' : `රු. ${Number(price).toLocaleString()} ගෙවීම ඉදිරිපත් කරන්න`}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </div>

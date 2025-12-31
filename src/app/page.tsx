@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Search, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import type { Icon as LucideIcon } from 'lucide-react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, limit, query } from 'firebase/firestore';
+import { collection, limit, query, where, getDocs, startAfter, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
@@ -17,31 +17,80 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [locationTerm, setLocationTerm] = useState('');
 
-  const adsQuery = useMemoFirebase(
-    () => {
-      if (!firestore) return null;
-      // Fetch more ads initially to allow for effective client-side filtering
-      return query(collection(firestore, 'ads'), limit(50));
-    },
-    [firestore]
-  );
-  
-  const { data: allAds, isLoading: isLoadingAds } = useCollection<any>(adsQuery);
+  const [ads, setAds] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
 
-  const filteredAds = useMemo(() => {
-    if (!allAds) return [];
-    return allAds
-      .filter(ad => {
-        const titleMatch = searchTerm.toLowerCase() 
-          ? ad.title.toLowerCase().includes(searchTerm.toLowerCase()) 
-          : true;
-        const locationMatch = locationTerm.toLowerCase()
-          ? ad.district.toLowerCase().includes(locationTerm.toLowerCase())
-          : true;
-        return titleMatch && locationMatch;
-      })
-      .slice(0, 8); // Limit to 8 after filtering
-  }, [allAds, searchTerm, locationTerm]);
+  const fetchInitialAds = useCallback(async () => {
+    if (!firestore) return;
+    setIsLoading(true);
+
+    let adsQuery: any = query(collection(firestore, 'ads'), orderBy('createdAt', 'desc'), limit(8));
+    
+    // Apply search filters if they exist
+    if (searchTerm) {
+        // Note: Firestore does not support full-text search natively on multiple fields like this.
+        // For a production app, a dedicated search service like Algolia or Typesense is recommended.
+        // This is a simplified client-side filter for demonstration.
+    }
+    if (locationTerm) {
+       adsQuery = query(adsQuery, where('district', '>=', locationTerm), where('district', '<=', locationTerm + '\uf8ff'));
+    }
+
+    try {
+        const documentSnapshots = await getDocs(adsQuery);
+        const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        let filteredAds = newAds;
+        if(searchTerm){
+             filteredAds = newAds.filter(ad => ad.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+
+        setAds(filteredAds);
+        const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
+        setLastVisible(last);
+        setHasMore(documentSnapshots.docs.length === 8);
+    } catch (error) {
+        console.error("Error fetching initial ads: ", error);
+    } finally {
+        setIsLoading(false);
+    }
+  }, [firestore, searchTerm, locationTerm]);
+
+  // Fetch initial ads on component mount and when filters change
+  useState(() => {
+    fetchInitialAds();
+  });
+  
+  const handleSearch = () => {
+      fetchInitialAds();
+  }
+  
+  const handleLoadMore = async () => {
+    if (!firestore || !lastVisible || !hasMore) return;
+    setIsLoading(true);
+
+    let adsQuery = query(collection(firestore, "ads"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(8));
+    
+    if (locationTerm) {
+       adsQuery = query(adsQuery, where('district', '>=', locationTerm), where('district', '<=', locationTerm + '\uf8ff'));
+    }
+
+    const documentSnapshots = await getDocs(adsQuery);
+    const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    let filteredAds = newAds;
+    if(searchTerm){
+         filteredAds = newAds.filter(ad => ad.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+
+    setAds(prevAds => [...prevAds, ...filteredAds]);
+    const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
+    setLastVisible(last);
+    setHasMore(documentSnapshots.docs.length === 8);
+    setIsLoading(false);
+  };
 
 
   return (
@@ -90,7 +139,7 @@ export default function Home() {
                   onChange={(e) => setLocationTerm(e.target.value)}
                 />
               </div>
-              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90">
+              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90" onClick={handleSearch}>
                 <Search className="mr-2" />
                 සොයන්න
               </Button>
@@ -129,34 +178,29 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-center font-headline mb-8 add-your-ad text-foreground">
               නවතම දැන්වීම්
             </h2>
-             {isLoadingAds && (
-               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {Array.from({ length: 8 }).map((_, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+               {ads.map((ad) => (
+                <AdCard key={ad.id} ad={ad} />
+              ))}
+              {isLoading && Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="space-y-2">
                         <Skeleton className="h-48 w-full" />
                         <Skeleton className="h-6 w-5/6" />
                         <Skeleton className="h-4 w-1/3" />
                     </div>
                 ))}
+            </div>
+            
+            {!isLoading && ads && ads.length === 0 && (
+              <div className="text-center text-muted-foreground py-16">
+                <p>ඔබගේ සෙවුමට ගැලපෙන දැන්වීම් හමු නොවීය.</p>
               </div>
             )}
-            {!isLoadingAds && filteredAds && filteredAds.length > 0 ? (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {filteredAds.map((ad) => (
-                    <AdCard key={ad.id} ad={ad} />
-                  ))}
-                </div>
-                <div className="text-center mt-12">
-                  <Button variant="outline" size="lg" disabled>තවත් දැන්වීම් බලන්න</Button>
-                </div>
-              </>
-            ) : (
-             !isLoadingAds && (
-                <div className="text-center text-muted-foreground py-16">
-                  <p>ඔබගේ සෙවුමට ගැලපෙන දැන්වීම් හමු නොවීය.</p>
-                </div>
-              )
+            
+            {hasMore && !isLoading && (
+              <div className="text-center mt-12">
+                <Button variant="outline" size="lg" onClick={handleLoadMore}>තවත් දැන්වීම් බලන්න</Button>
+              </div>
             )}
           </div>
         </section>

@@ -3,37 +3,75 @@
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { collection, query, where, getDocs, limit, startAfter, orderBy } from 'firebase/firestore';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useParams } from 'next/navigation';
 import { subCategories18Plus } from '@/lib/18-plus-categories';
+import { useState, useEffect } from 'react';
 
 export default function EighteenPlusSubCategoryPage() {
   const firestore = useFirestore();
   const params = useParams();
   const slug = params.slug as string;
 
+  const [ads, setAds] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
+
   const currentCategory = subCategories18Plus.find(cat => cat.slug === slug);
 
-  const adsQuery = useMemoFirebase(
-    () => {
-      if (!firestore || !slug) return null;
-      // We are querying the main categoryId as '18-plus' and then the subcategory slug
-      // The schema needs to support a sub-category field on the ad document for this to work perfectly.
-      // For now, let's assume `categoryId` can hold values like `18-plus-girls-personal`.
-      // We'll query for `categoryId` == '18-plus' and then filter client side, as a workaround.
-      return query(collection(firestore, 'ads'), where('categoryId', '==', '18-plus'));
-    },
-    [firestore, slug]
-  );
+  useEffect(() => {
+    const fetchInitialAds = async () => {
+      if (!firestore || !slug) return;
+      setIsLoading(true);
+      const first = query(
+        collection(firestore, "ads"), 
+        where('categoryId', '==', '18-plus'), 
+        where('subCategoryId', '==', slug),
+        orderBy("createdAt", "desc"), 
+        limit(8)
+      );
+      const documentSnapshots = await getDocs(first);
+
+      const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAds(newAds);
+
+      const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
+      setLastVisible(last);
+
+      setHasMore(documentSnapshots.docs.length === 8);
+      setIsLoading(false);
+    };
+
+    fetchInitialAds();
+  }, [firestore, slug]);
   
-  // NOTE: This is a client-side filter. For production, you'd add a `subCategoryId` field
-  // to your Firestore documents and query on that directly for better performance.
-  const { data: ads, isLoading: isLoadingAds } = useCollection<any>(adsQuery, (data) =>
-    data.filter(ad => ad.subCategoryId === slug)
-  );
+  const handleLoadMore = async () => {
+    if (!firestore || !lastVisible || !hasMore) return;
+    setIsLoading(true);
+
+    const next = query(
+        collection(firestore, "ads"), 
+        where('categoryId', '==', '18-plus'), 
+        where('subCategoryId', '==', slug),
+        orderBy("createdAt", "desc"), 
+        startAfter(lastVisible), 
+        limit(8)
+    );
+
+    const documentSnapshots = await getDocs(next);
+    const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setAds(prevAds => [...prevAds, ...newAds]);
+    
+    const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
+    setLastVisible(last);
+    
+    setHasMore(documentSnapshots.docs.length === 8);
+    setIsLoading(false);
+  };
 
   return (
     <>
@@ -63,32 +101,21 @@ export default function EighteenPlusSubCategoryPage() {
             <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">මෙම ප්‍රවර්ගයේ ඔබේ දැන්වීම පළ කරන්න!</Link></h3>
         </div>
 
-        {isLoadingAds && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {ads.map((ad) => (
+            <AdCard key={ad.id} ad={ad} />
+            ))}
+            {isLoading && Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="space-y-2">
                     <Skeleton className="h-48 w-full" />
                     <Skeleton className="h-6 w-5/6" />
                     <Skeleton className="h-4 w-1/3" />
                 </div>
             ))}
-          </div>
-        )}
+        </div>
 
-        {!isLoadingAds && ads && ads.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {ads.map((ad) => (
-                <AdCard key={ad.id} ad={ad} />
-              ))}
-            </div>
-            <div className="text-center mt-12">
-              <Button variant="outline" size="lg" disabled>තවත් පූරණය කරන්න</Button>
-            </div>
-          </>
-        ) : (
-          !isLoadingAds && (
-            <Card className="mt-8">
+        {!isLoading && ads.length === 0 && (
+           <Card className="mt-8 col-span-full">
                 <CardHeader>
                     <CardTitle>දැන්වීම් හමු නොවීය</CardTitle>
                     <CardDescription>
@@ -111,7 +138,14 @@ export default function EighteenPlusSubCategoryPage() {
                     </div>
                 </CardContent>
             </Card>
-          )
+        )}
+        
+        {hasMore && !isLoading && (
+          <div className="text-center mt-12">
+            <Button variant="outline" size="lg" onClick={handleLoadMore} disabled={isLoading}>
+                {isLoading ? 'පූරණය වෙමින්...' : 'තවත් පූරණය කරන්න'}
+            </Button>
+          </div>
         )}
       </div>
     </>
