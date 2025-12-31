@@ -3,6 +3,7 @@
 import { subCategories18Plus } from '@/lib/18-plus-categories';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
+import React from 'react';
 
 export default function EighteenPlusCategoryPage() {
   return (
@@ -29,13 +30,30 @@ export default function EighteenPlusCategoryPage() {
           </p>
         </div>
         
-        {/* Mid-page banner */}
         <div className="my-8 p-6 bg-accent/20 rounded-lg text-center">
             <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">ඔබේ 18+ දැන්වීම් මෙහි පළ කරන්න!</Link></h3>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {subCategories18Plus.map((category) => {
+          {subCategories18Plus.slice(0, 8).map((category) => {
+            const Icon = category.icon;
+            return (
+              <Link href={`/category/18-plus/${category.slug}`} key={category.slug}>
+                <Card className="group flex flex-col items-center justify-center p-6 bg-card rounded-lg shadow-sm hover:shadow-md transition-shadow text-center h-full">
+                  <div className="p-4 bg-primary/10 rounded-full mb-4">
+                    <Icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">{category.name}</h3>
+                </Card>
+              </Link>
+            );
+          })}
+          
+          <div className="col-span-full my-4 p-6 bg-accent/20 rounded-lg text-center">
+             <h3 className="font-bold text-accent-foreground text-2xl add-your-ad"><Link href="/post-ad">ඔබේ දැන්වීම මෙහි පළ කරන්න!</Link></h3>
+          </div>
+
+          {subCategories18Plus.slice(8).map((category) => {
             const Icon = category.icon;
             return (
               <Link href={`/category/18-plus/${category.slug}`} key={category.slug}>
@@ -50,7 +68,6 @@ export default function EighteenPlusCategoryPage() {
           })}
         </div>
 
-        {/* Bottom banner ad spot */}
         <div className="my-12 p-8 bg-accent/20 rounded-lg text-center">
             <h3 className="font-bold text-accent-foreground text-3xl add-your-ad">
                 <Link href="/post-ad">ඔබේ දැන්වීම මෙහි පළ කරන්න!</Link>
