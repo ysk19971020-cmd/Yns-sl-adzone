@@ -52,7 +52,7 @@ const bannerDurations = [
     { id: '2-weeks', name: 'සති 2ක්', price: 1400 },
     { id: '1-month', name: 'මාසයක්', price: 2800 },
 ];
-const bannerPositions = ['ඉහළ', 'පහළ', 'වම', 'දකුණ'];
+const bannerPositions = ['Top', 'Bottom', 'Left', 'Right'];
 const bannerAdSchema = z.object({
   description: z.string().min(10, 'විස්තරය අවම වශයෙන් අක්ෂර 10ක් විය යුතුය'),
   categoryId: z.string({ required_error: 'කරුණාකර ප්‍රවර්ගයක් තෝරන්න' }),
