@@ -34,7 +34,7 @@ const classifiedAdSchema = z.object({
   subCategoryId: z.string().optional(),
   district: z.string({ required_error: 'කරුණාකර දිස්ත්‍රික්කයක් තෝරන්න' }),
   phoneNumber: z.string().min(10, 'කරුණාකර වලංගු දුරකථන අංකයක් ඇතුළත් කරන්න'),
-  images: z.array(z.instanceof(File)).min(1, 'කරුණාකර අවම වශයෙන් එක් ඡායාරූපයක් උඩුගත කරන්න').max(5, 'ඔබට උපරිම වශයෙන් ඡායාරූප 5ක් උඩුගත කළ හැක'),
+  images: z.array(z.instanceof(File)).min(1, 'කරුණාකර අවම වශයෙන් එක් ඡායารූපයක් උඩුගත කරන්න').max(5, 'ඔබට උපරිම වශයෙන් ඡායාරූප 5ක් උඩුගත කළ හැක'),
 }).refine(data => {
     if (data.categoryId === '18-plus') {
         return !!data.subCategoryId;
@@ -77,11 +77,27 @@ export default function PostAdPage() {
 
   const classifiedForm = useForm<ClassifiedAdFormValues>({
     resolver: zodResolver(classifiedAdSchema),
-    defaultValues: { images: [] },
+    defaultValues: { 
+        images: [],
+        title: '',
+        description: '',
+        price: 0,
+        categoryId: '',
+        subCategoryId: '',
+        district: '',
+        phoneNumber: ''
+    },
   });
 
   const bannerForm = useForm<BannerAdFormValues>({
     resolver: zodResolver(bannerAdSchema),
+    defaultValues: {
+        description: '',
+        categoryId: '',
+        position: '',
+        duration: '',
+        whatsappNumber: '',
+    }
   });
   
   const selectedMainCategory = classifiedForm.watch('categoryId');
