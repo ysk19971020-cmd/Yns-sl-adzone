@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, FormEvent } from 'react';
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { categories } from '@/lib/data';
 import { Search, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import type { Icon as LucideIcon } from 'lucide-react';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, limit, query, where, getDocs, startAfter, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const firestore = useFirestore();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationTerm, setLocationTerm] = useState('');
 
@@ -22,32 +23,16 @@ export default function Home() {
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchInitialAds = useCallback(async () => {
+  const fetchInitialAds = async () => {
     if (!firestore) return;
     setIsLoading(true);
 
-    let adsQuery: any = query(collection(firestore, 'ads'), orderBy('createdAt', 'desc'), limit(8));
-    
-    // Apply search filters if they exist
-    if (searchTerm) {
-        // Note: Firestore does not support full-text search natively on multiple fields like this.
-        // For a production app, a dedicated search service like Algolia or Typesense is recommended.
-        // This is a simplified client-side filter for demonstration.
-    }
-    if (locationTerm) {
-       adsQuery = query(adsQuery, where('district', '>=', locationTerm), where('district', '<=', locationTerm + '\uf8ff'));
-    }
-
     try {
+        const adsQuery = query(collection(firestore, 'ads'), where('status', '==', 'active'), orderBy('createdAt', 'desc'), limit(8));
         const documentSnapshots = await getDocs(adsQuery);
         const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         
-        let filteredAds = newAds;
-        if(searchTerm){
-             filteredAds = newAds.filter(ad => ad.title.toLowerCase().includes(searchTerm.toLowerCase()));
-        }
-
-        setAds(filteredAds);
+        setAds(newAds);
         const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
         setLastVisible(last);
         setHasMore(documentSnapshots.docs.length === 8);
@@ -56,36 +41,36 @@ export default function Home() {
     } finally {
         setIsLoading(false);
     }
-  }, [firestore, searchTerm, locationTerm]);
+  };
 
-  // Fetch initial ads on component mount and when filters change
   useState(() => {
     fetchInitialAds();
   });
   
-  const handleSearch = () => {
-      fetchInitialAds();
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('q', searchTerm);
+    if (locationTerm) params.set('district', locationTerm);
+    router.push(`/search?${params.toString()}`);
   }
   
   const handleLoadMore = async () => {
     if (!firestore || !lastVisible || !hasMore) return;
     setIsLoading(true);
 
-    let adsQuery = query(collection(firestore, "ads"), orderBy("createdAt", "desc"), startAfter(lastVisible), limit(8));
-    
-    if (locationTerm) {
-       adsQuery = query(adsQuery, where('district', '>=', locationTerm), where('district', '<=', locationTerm + '\uf8ff'));
-    }
+    const adsQuery = query(
+        collection(firestore, "ads"), 
+        where('status', '==', 'active'),
+        orderBy("createdAt", "desc"), 
+        startAfter(lastVisible), 
+        limit(8)
+    );
 
     const documentSnapshots = await getDocs(adsQuery);
     const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    let filteredAds = newAds;
-    if(searchTerm){
-         filteredAds = newAds.filter(ad => ad.title.toLowerCase().includes(searchTerm.toLowerCase()));
-    }
 
-    setAds(prevAds => [...prevAds, ...filteredAds]);
+    setAds(prevAds => [...prevAds, ...newAds]);
     const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
     setLastVisible(last);
     setHasMore(documentSnapshots.docs.length === 8);
@@ -118,7 +103,7 @@ export default function Home() {
             <p className="mt-4 text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               වාහන, දේපළ, ඉලෙක්ට්‍රොනික උපකරණ සහ තවත් දේ සඳහා ඔබේ එකම වෙළඳපොළ.
             </p>
-            <div className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4 p-4 bg-background rounded-lg shadow-inner">
+            <form onSubmit={handleSearch} className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4 p-4 bg-background rounded-lg shadow-inner">
               <div className="relative flex-grow w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -139,11 +124,11 @@ export default function Home() {
                   onChange={(e) => setLocationTerm(e.target.value)}
                 />
               </div>
-              <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90" onClick={handleSearch}>
+              <Button type="submit" size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90">
                 <Search className="mr-2" />
                 සොයන්න
               </Button>
-            </div>
+            </form>
           </div>
         </section>
 

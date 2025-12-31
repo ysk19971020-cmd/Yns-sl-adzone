@@ -1,7 +1,7 @@
 'use client';
 
 import { useFirestore, useCollection, useMemoFirebase } from "@/firebase";
-import { collection, doc, deleteDoc } from "firebase/firestore";
+import { collection, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Trash2 } from "lucide-react";
 import Image from 'next/image';
+import { Switch } from "@/components/ui/switch";
 
 interface AdData {
   id: string;
@@ -31,6 +32,7 @@ interface AdData {
   userId: string;
   imageUrls: string[];
   createdAt: any;
+  status: 'active' | 'suspended';
 }
 
 export default function AdsPage() {
@@ -61,6 +63,26 @@ export default function AdsPage() {
       });
     }
   };
+  
+  const handleStatusToggle = async (adId: string, currentStatus: 'active' | 'suspended') => {
+      if (!firestore) return;
+      const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
+      try {
+        await updateDoc(doc(firestore, 'ads', adId), { status: newStatus });
+        toast({
+          title: "සාර්ථකයි",
+          description: `දැන්වීමේ තත්ත්වය ${newStatus} ලෙස යාවත්කාලීන කරන ලදී.`,
+        });
+      } catch (error) {
+        console.error("Error toggling ad status:", error);
+        toast({
+            variant: "destructive",
+            title: "දෝෂයකි",
+            description: "දැන්වීමේ තත්ත්වය යාවත්කාලීන කිරීමට නොහැකි විය.",
+        });
+      }
+  };
+
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
@@ -81,7 +103,7 @@ export default function AdsPage() {
                 <TableHead>දැන්වීම</TableHead>
                 <TableHead>මිල</TableHead>
                 <TableHead>ප්‍රවර්ගය</TableHead>
-                <TableHead>දිස්ත්‍රික්කය</TableHead>
+                <TableHead>තත්ත්වය</TableHead>
                 <TableHead>පරිශීලක ID</TableHead>
                 <TableHead className="text-right">ක්‍රියා</TableHead>
               </TableRow>
@@ -113,7 +135,18 @@ export default function AdsPage() {
                     </TableCell>
                     <TableCell>රු. {ad.price.toLocaleString()}</TableCell>
                     <TableCell><Badge variant="outline">{ad.categoryId}</Badge></TableCell>
-                    <TableCell>{ad.district}</TableCell>
+                    <TableCell>
+                        <div className="flex items-center gap-2">
+                             <Switch
+                                checked={ad.status === 'active'}
+                                onCheckedChange={() => handleStatusToggle(ad.id, ad.status)}
+                                aria-label="Toggle ad status"
+                            />
+                            <Badge variant={ad.status === 'active' ? 'default' : 'destructive'}>
+                                {ad.status === 'active' ? 'සක්‍රියයි' : 'අක්‍රියයි'}
+                            </Badge>
+                        </div>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{ad.userId}</TableCell>
                     <TableCell className="text-right">
                        <AlertDialog>

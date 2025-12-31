@@ -2,25 +2,88 @@
 
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Star, Edit, ShoppingBag, BadgeCheck } from 'lucide-react';
+import { User, Star, Edit, ShoppingBag, BadgeCheck, Mail, KeyRound } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 import { format } from 'date-fns';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { updateEmail, updatePassword } from 'firebase/auth';
+
+const profileSchema = z.object({
+  email: z.string().email('කරුණාකර වලංගු ඊමේල් ලිපිනයක් ඇතුළත් කරන්න.'),
+});
+
+const passwordSchema = z.object({
+  newPassword: z.string().min(6, 'මුරපදය අවම වශයෙන් අක්ෂර 6ක් විය යුතුය.'),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: 'මුරපද නොගැලපේ',
+  path: ['confirmPassword'],
+});
 
 export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const emailForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: { email: user?.email || '' },
+  });
+
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { newPassword: '', confirmPassword: '' },
+  });
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, isUserLoading, router]);
-  
+    if (user) {
+      emailForm.setValue('email', user.email || '');
+    }
+  }, [user, isUserLoading, router, emailForm]);
+
+  const onEmailSubmit = async (data: z.infer<typeof profileSchema>) => {
+    if (!user) return;
+    setIsUpdating(true);
+    try {
+      await updateEmail(user, data.email);
+      toast({ title: 'සාර්ථකයි', description: 'ඔබගේ ඊමේල් ලිපිනය යාවත්කාලීන කරන ලදී. කරුණාකර නැවත පිවිසෙන්න.' });
+       router.push('/login');
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'ඊමේල් ලිපිනය යාවත්කාලීන කිරීමට නොහැකි විය: ' + error.message });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const onPasswordSubmit = async (data: z.infer<typeof passwordSchema>) => {
+    if (!user) return;
+    setIsUpdating(true);
+    try {
+      await updatePassword(user, data.newPassword);
+      toast({ title: 'සාර්ථකයි', description: 'ඔබගේ මුරපදය සාර්ථකව වෙනස් කරන ලදී.' });
+      passwordForm.reset();
+    } catch (error: any)
+    {
+      toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'මුරපදය වෙනස් කිරීමට නොහැකි විය: ' + error.message });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const userMembershipsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
@@ -31,7 +94,7 @@ export default function ProfilePage() {
       limit(1)
     );
   }, [user, firestore]);
-  
+
   const { data: activeMemberships, isLoading: isLoadingMemberships } = useCollection<any>(userMembershipsQuery);
   const activePlan = activeMemberships?.[0];
 
@@ -110,11 +173,52 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          <div>
-            <Button className="w-full" disabled>
-                <Edit className="mr-2 h-4 w-4" /> පැතිකඩ සංස්කරණය කරන්න (ළඟදීම)
-            </Button>
-          </div>
+          <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Mail className="w-5 h-5"/>ඊමේල් ලිපිනය වෙනස් කරන්න</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...emailForm}>
+                    <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
+                        <FormField control={emailForm.control} name="email" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>නව ඊමේල්</FormLabel>
+                                <FormControl><Input placeholder="නව ඊමේල් ලිපිනය" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <Button type="submit" disabled={isUpdating}>{isUpdating ? 'යාවත්කාලීන කරමින්...' : 'ඊමේල් යාවත්කාලීන කරන්න'}</Button>
+                    </form>
+                </Form>
+            </CardContent>
+          </Card>
+          
+           <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><KeyRound className="w-5 h-5"/>මුරපදය වෙනස් කරන්න</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                        <FormField control={passwordForm.control} name="newPassword" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>නව මුරපදය</FormLabel>
+                                <FormControl><Input type="password" placeholder="නව මුරපදය" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                         <FormField control={passwordForm.control} name="confirmPassword" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>නව මුරපදය තහවුරු කරන්න</FormLabel>
+                                <FormControl><Input type="password" placeholder="මුරපදය තහවුරු කරන්න" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <Button type="submit" disabled={isUpdating}>{isUpdating ? 'වෙනස් කරමින්...' : 'මුරපදය වෙනස් කරන්න'}</Button>
+                    </form>
+                </Form>
+            </CardContent>
+          </Card>
 
         </CardContent>
       </Card>

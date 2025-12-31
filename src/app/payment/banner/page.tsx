@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { addDoc, collection, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid'; 
-import { CreditCard, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 

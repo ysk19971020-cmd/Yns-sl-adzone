@@ -1,17 +1,20 @@
 'use client';
 
 import { useParams, usePathname } from 'next/navigation';
-import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirestore, useDoc, useCollection, useMemoFirebase, useUser } from '@/firebase';
+import { doc, collection, query, where, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import Image from 'next/image';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Tag, Phone, User, Calendar, Text, Share2, Copy } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Tag, Phone, User, Calendar, Text, Share2, Copy, Heart, MessageCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import { useEffect, useState } from 'react';
 
 function AdDetailSkeleton() {
     return (
@@ -50,10 +53,102 @@ function AdDetailSkeleton() {
     );
 }
 
+function CommentSection({ adId }: { adId: string }) {
+    const { user } = useUser();
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const [commentText, setCommentText] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const commentsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, `ads/${adId}/comments`), orderBy('createdAt', 'desc'));
+    }, [firestore, adId]);
+
+    const { data: comments, isLoading } = useCollection<any>(commentsQuery);
+
+    const handleCommentSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user) {
+            toast({ variant: 'destructive', title: 'අනවසරයි', description: 'අදහස් දැක්වීමට කරුණාකර පිවිසෙන්න.' });
+            return;
+        }
+        if (!commentText.trim() || !firestore) return;
+
+        setIsSubmitting(true);
+        try {
+            await addDoc(collection(firestore, `ads/${adId}/comments`), {
+                adId: adId,
+                userId: user.uid,
+                userEmail: user.email,
+                text: commentText,
+                createdAt: serverTimestamp(),
+            });
+            setCommentText('');
+            toast({ title: 'සාර්ථකයි', description: 'ඔබගේ අදහස පළ කරන ලදී.' });
+        } catch (error: any) {
+            console.error("Error posting comment:", error);
+            toast({ variant: 'destructive', title: 'දෝෂයකි', description: 'අදහස පළ කිරීමට නොහැකි විය: ' + error.message });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <Card className="mt-8">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="w-6 h-6" />
+                    අදහස්
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                {user && (
+                    <form onSubmit={handleCommentSubmit} className="flex flex-col gap-4 mb-6">
+                        <Textarea
+                            placeholder="ඔබගේ අදහස මෙහි ටයිප් කරන්න..."
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
+                            disabled={isSubmitting}
+                        />
+                        <Button type="submit" disabled={isSubmitting || !commentText.trim()} className="self-end">
+                            {isSubmitting ? 'පළ කරමින්...' : 'අදහස පළ කරන්න'}
+                        </Button>
+                    </form>
+                )}
+                <div className="space-y-6">
+                    {isLoading ? (
+                        <Skeleton className="h-16 w-full" />
+                    ) : comments && comments.length > 0 ? (
+                        comments.map(comment => (
+                            <div key={comment.id} className="flex items-start gap-3">
+                                <Avatar>
+                                    <AvatarFallback>{comment.userEmail ? comment.userEmail.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-semibold text-sm">{comment.userEmail || 'Anonymous'}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}
+                                        </p>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground mt-1">{comment.text}</p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-center text-sm text-muted-foreground py-4">තවමත් අදහස් කිසිවක් නොමැත. පළමුවැන්නා වන්න!</p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
 export default function AdDetailPage() {
     const { id } = useParams();
     const firestore = useFirestore();
-    const pathname = usePathname();
+    const { user } = useUser();
     const { toast } = useToast();
 
     const adId = Array.isArray(id) ? id[0] : id;
@@ -64,6 +159,41 @@ export default function AdDetailPage() {
     }, [firestore, adId]);
 
     const { data: ad, isLoading, error } = useDoc<any>(adRef);
+
+    // Likes
+    const likesQuery = useMemoFirebase(() => {
+        if (!firestore || !adId) return null;
+        return collection(firestore, `ads/${adId}/likes`);
+    }, [firestore, adId]);
+    const { data: likes } = useCollection(likesQuery);
+    
+    const userLikeQuery = useMemoFirebase(() => {
+        if (!firestore || !adId || !user) return null;
+        return query(collection(firestore, `ads/${adId}/likes`), where('userId', '==', user.uid));
+    }, [firestore, adId, user]);
+    const { data: userLike } = useCollection(userLikeQuery);
+
+    const hasLiked = userLike && userLike.length > 0;
+    const likeCount = likes?.length || 0;
+
+    const handleLike = async () => {
+        if (!user || !firestore || !adId) {
+            toast({ variant: 'destructive', title: 'අනවසරයි', description: 'කැමති වීමට කරුණාකර පිවිසෙන්න.' });
+            return;
+        }
+
+        const likeRef = collection(firestore, `ads/${adId}/likes`);
+        if (hasLiked) {
+            // Unlike
+            const likeDoc = userLike?.[0];
+            if (likeDoc) {
+                await deleteDoc(doc(firestore, `ads/${adId}/likes`, likeDoc.id));
+            }
+        } else {
+            // Like
+            await addDoc(likeRef, { userId: user.uid, adId: adId });
+        }
+    };
     
     const handleCopyLink = () => {
         const url = window.location.href;
@@ -106,6 +236,10 @@ export default function AdDetailPage() {
                     <Calendar className="w-4 h-4" />
                     <span>පළ කරන ලදී {postedAt}</span>
                 </div>
+                 <div className="flex items-center gap-1.5">
+                    <Heart className="w-4 h-4"/>
+                    <span>{likeCount} කැමතියි</span>
+                </div>
             </div>
 
             <div className="grid md:grid-cols-5 gap-8">
@@ -147,6 +281,12 @@ export default function AdDetailPage() {
                             </div>
                         </CardContent>
                     </Card>
+                     {user && (
+                        <Button variant={hasLiked ? "secondary" : "default"} onClick={handleLike} className="w-full mt-4">
+                            <Heart className={`mr-2 h-4 w-4 ${hasLiked ? '' : 'fill-current'}`} />
+                            {hasLiked ? 'කැමති' : 'කැමති වන්න'}
+                        </Button>
+                    )}
                 </div>
             </div>
 
@@ -165,7 +305,7 @@ export default function AdDetailPage() {
                     </Button>
                      <Button asChild variant="outline" size="icon">
                         <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(adUrl)}&text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-2.1 2.1c-1.1 1.1-2.2 2.3-2.3 2.4s-1.2 1.1-2.2 1.1c-.8 0-1.1-1.1-1.1-1.1s-1.1-1.1-2.3-1.1c-1.1 0-2.1 1.1-2.1 1.1s-1.1 1.1-2.3 1.1c-1 0-2.1-1.1-2.1-1.1s-1.1-1-2.2-1.1c-1.1 0-2.1 1.1-2.1 1.1s-.7-1.1-1.1-1.1c-.3 0-1.1.2-1.1.2s-2.1-1-2.8-2.2c-.8-1.1-1.1-2.2-1.1-2.2s.3-1.1 1.1-2.2c.8-1.2 2.2-2.3 2.2-2.3s1.2 1.1 2.3 2.3c1.1 1.1 2.3 2.3 3.4 2.3s2.3-2.3 2.3-2.3l.2-.2s1.1 1.1 2.3 1.1c1.1 0 2.2-1.1 2.2-1.1s1.1-1.1 2.3-1.1c.9 0 1.9.6 1.9.6s-1.1-2.1-2.2-3.2c-1.1-1.1-2.3-2.3-3.4-2.3s-2.3 1.1-2.3 1.1l-.2.2s-1.1-1.1-2.3-1.1c-1.1 0-2.2 1.1-2.2 1.1s-1.1 1-2.3 1.1c-.9 0-1.9-.6-1.9-.6s1.1 2.1 2.2 3.2c1.1 1.1 2.3 2.3 3.4 2.3s2.3-1.1 2.3-1.1l.2-.2s1.1 1.1 2.3 1.1c1.1 0 2.2-1.1 2.2-1.1s1.1-1.1 2.3-1.1c.9 0 1.9.6 1.9.6s-1.1-2.1-2.2-3.2c-1.1-1.1-2.3-2.3-3.4-2.3s-2.3 1.1-2.3 1.1l-.2.2s-1.1-1.1-2.3-1.1c-1.1 0-2.2 1.1-2.2 1.1z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5"><path d="M22 4s-.7 2.1-2 3.4c1.6 1.4 3.3 4.4 3.3 4.4s-1.4 1.4-2.1 2.1c-1.1 1.1-2.2 2.3-2.3 2.4s-1.2 1.1-2.2 1.1c-.8 0-1.1-1.1-1.1-1.1s-1.1-1.1-2.3-1.1c-1.1 0-2.1 1.1-2.1 1.1s-1.1 1.1-2.3 1.1c-1 0-2.1-1.1-2.1-1.1s-1.1-1-2.2-1.1c-1.1 0-2.1 1.1-2.1 1.1s-.7-1.1-1.1-1.1c-.3 0-1.1.2-1.1.2s-2.1-1-2.8-2.2c-.8-1.1-1.1-2.2-1.1-2.2s.3-1.1 1.1-2.2c.8-1.2 2.2-2.3 2.2-2.3s1.2 1.1 2.3 2.3c1.1 1.1 2.3 2.3 3.4 2.3s2.3-2.3 2.3-2.3l.2-.2s1.1 1.1 2.3 1.1c1.1 0 2.2-1.1 2.2-1.1s1.1-1.1 2.3-1.1c.9 0 1.9.6 1.9.6s-1.1-2.1-2.2-3.2c-1.1-1.1-2.3-2.3-3.4-2.3s-2.3 1.1-2.3 1.1l-.2.2s-1.1-1.1-2.3-1.1c-1.1 0-2.2 1.1-2.2 1.1z"/></svg>
                         </a>
                     </Button>
                      <Button asChild variant="outline" size="icon">
@@ -178,6 +318,9 @@ export default function AdDetailPage() {
                     </Button>
                 </div>
             </div>
+            
+            <CommentSection adId={adId} />
+
         </div>
     );
 }

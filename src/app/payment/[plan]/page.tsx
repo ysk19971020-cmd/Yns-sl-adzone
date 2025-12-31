@@ -12,8 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid'; 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CreditCard, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function PaymentPage() {
@@ -26,7 +25,6 @@ export default function PaymentPage() {
     const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
     const [paymentSlip, setPaymentSlip] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState("manual");
 
     const selectedPlan = pricingPlans.find(p => p.id === plan);
 
