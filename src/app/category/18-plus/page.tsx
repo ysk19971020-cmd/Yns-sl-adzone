@@ -49,6 +49,14 @@ export default function EighteenPlusCategoryPage() {
             );
           })}
         </div>
+
+        {/* Bottom banner ad spot */}
+        <div className="my-12 p-8 bg-accent/20 rounded-lg text-center">
+            <h3 className="font-bold text-accent-foreground text-3xl add-your-ad">
+                <Link href="/post-ad">ඔබේ දැන්වීම මෙහි පළ කරන්න!</Link>
+            </h3>
+        </div>
+
       </div>
     </>
   );
