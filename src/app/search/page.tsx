@@ -31,9 +31,6 @@ function SearchComponent() {
   const buildQuery = (forLoadMore = false) => {
     let q: any = collection(firestore, 'ads');
     
-    // Always filter by status first if it's a primary filter.
-    q = query(q, where('status', '==', 'active'));
-
     if (district) {
       q = query(q, where('district', '==', district));
     }
@@ -60,10 +57,11 @@ function SearchComponent() {
         const documentSnapshots = await getDocs(adsQuery);
         let fetchedAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Manual text search on title and description after fetching
+        // Manual filtering for status and text search after fetching
+        let filteredAds = fetchedAds.filter(ad => ad.status === 'active');
         if (searchTerm) {
             const lowercasedTerm = searchTerm.toLowerCase();
-            fetchedAds = fetchedAds.filter(ad => 
+            filteredAds = filteredAds.filter(ad => 
                 ad.title.toLowerCase().includes(lowercasedTerm) || 
                 ad.description.toLowerCase().includes(lowercasedTerm)
             );
@@ -73,9 +71,9 @@ function SearchComponent() {
         setHasMore(documentSnapshots.docs.length === 12);
         
         if (loadMore) {
-          setAds(prev => [...prev, ...fetchedAds]);
+          setAds(prev => [...prev, ...filteredAds]);
         } else {
-          setAds(fetchedAds);
+          setAds(filteredAds);
         }
 
       } catch (error) {

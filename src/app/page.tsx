@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { AdCard } from '@/components/ad-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { categories } from '@/lib/data';
 import { Search, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, limit, query, where, getDocs, startAfter, orderBy } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { collection, limit, query, getDocs, startAfter, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from 'next/navigation';
 
@@ -23,29 +23,29 @@ export default function Home() {
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchInitialAds = async () => {
-    if (!firestore) return;
-    setIsLoading(true);
+  useEffect(() => {
+    const fetchInitialAds = async () => {
+      if (!firestore) return;
+      setIsLoading(true);
 
-    try {
-        const adsQuery = query(collection(firestore, 'ads'), where('status', '==', 'active'), orderBy('createdAt', 'desc'), limit(8));
-        const documentSnapshots = await getDocs(adsQuery);
-        const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        setAds(newAds);
-        const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
-        setLastVisible(last);
-        setHasMore(documentSnapshots.docs.length === 8);
-    } catch (error) {
-        console.error("Error fetching initial ads: ", error);
-    } finally {
-        setIsLoading(false);
-    }
-  };
-
-  useState(() => {
+      try {
+          const adsQuery = query(collection(firestore, 'ads'), orderBy('createdAt', 'desc'), limit(8));
+          const documentSnapshots = await getDocs(adsQuery);
+          const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(ad => ad.status === 'active');
+          
+          setAds(newAds);
+          const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
+          setLastVisible(last);
+          setHasMore(documentSnapshots.docs.length === 8);
+      } catch (error) {
+          console.error("Error fetching initial ads: ", error);
+      } finally {
+          setIsLoading(false);
+      }
+    };
+    
     fetchInitialAds();
-  });
+  }, [firestore]);
   
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -61,14 +61,13 @@ export default function Home() {
 
     const adsQuery = query(
         collection(firestore, "ads"), 
-        where('status', '==', 'active'),
         orderBy("createdAt", "desc"), 
         startAfter(lastVisible), 
         limit(8)
     );
 
     const documentSnapshots = await getDocs(adsQuery);
-    const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const newAds = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(ad => ad.status === 'active');
 
     setAds(prevAds => [...prevAds, ...newAds]);
     const last = documentSnapshots.docs[documentSnapshots.docs.length-1];
