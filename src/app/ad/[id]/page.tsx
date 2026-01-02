@@ -2,7 +2,7 @@
 
 import { useParams, usePathname } from 'next/navigation';
 import { useFirestore, useDoc, useCollection, useMemoFirebase, useUser } from '@/firebase';
-import { doc, collection, query, where, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, collection, query, where, addDoc, deleteDoc, serverTimestamp, orderBy } from 'firebase/firestore';
 import Image from 'next/image';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
