@@ -17,3 +17,6 @@ git branch -M main
 git remote add origin https://github.com/ysk19971020-cmd/Yns-sl-adzone.git
 git push -u origin main
 ```
+git add .
+git commit -m "Add all project files"
+git push
