@@ -2,7 +2,7 @@
 
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { collection, query, where, deleteDoc, doc } from 'firebase/firestore';
@@ -37,7 +37,7 @@ export default function MyAdsPage() {
 
   const adsQuery = useMemoFirebase(
     () => {
-      if (!firestore || !user) return null;
+      if (!firestore || !user?.uid) return null; // Check for user.uid specifically
       return query(collection(firestore, 'ads'), where('userId', '==', user.uid));
     },
     [firestore, user]
