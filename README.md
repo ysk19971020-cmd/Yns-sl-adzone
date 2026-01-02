@@ -17,3 +17,10 @@ git branch -M main
 git remote add origin https://github.com/ysk19971020-cmd/Yns-sl-adzone.git
 git push -u origin main
 ```
+
+The following commands were run to add all project files and push them to the remote repository:
+```bash
+git add .
+git commit -m "Add all project files"
+git push
+```
