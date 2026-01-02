@@ -9,7 +9,11 @@ To get started, take a look at src/app/page.tsx.
 The following commands were run to set up the local repository and connect it to GitHub:
 
 ```bash
-git remote -v
+echo "# Yns-sl-adzone" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
 git branch -M main
+git remote add origin https://github.com/ysk19971020-cmd/Yns-sl-adzone.git
 git push -u origin main
 ```
