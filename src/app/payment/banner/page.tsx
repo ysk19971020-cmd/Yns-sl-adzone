@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { addDoc, collection, serverTimestamp, setDoc, doc } from 'firebase/firestore';
-import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadString, getDownloadURL, uploadBytes } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid'; 
 import { Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -88,84 +88,63 @@ function PaymentBannerComponent() {
             const storage = getStorage();
             const bannerId = uuidv4();
 
-            // 1. Upload banner image to Storage
+            // 1. Upload banner image to Storage from data URI
             const bannerImageExt = bannerImageDataUri.split(';')[0].split('/')[1];
             const bannerImageName = `banner_images/${user.uid}/${bannerId}.${bannerImageExt}`;
             const bannerStorageRef = ref(storage, bannerImageName);
             await uploadString(bannerStorageRef, bannerImageDataUri, 'data_url');
             const bannerImageUrl = await getDownloadURL(bannerStorageRef);
 
-            // 2. Upload payment slip to Storage
+            // 2. Upload payment slip to Storage from File object
             const slipExt = paymentSlip.name.split('.').pop();
             const slipName = `payment_slips/${user.uid}/${uuidv4()}.${slipExt}`;
             const slipStorageRef = ref(storage, slipName);
+            await uploadBytes(slipStorageRef, paymentSlip);
+            const paymentSlipUrl = await getDownloadURL(slipStorageRef);
             
-            const slipReader = new FileReader();
-            slipReader.readAsDataURL(paymentSlip);
-            slipReader.onload = async (e) => {
-                try {
-                    const slipDataUrl = e.target?.result as string;
-                    await uploadString(slipStorageRef, slipDataUrl, 'data_url');
-                    const paymentSlipUrl = await getDownloadURL(slipStorageRef);
-                    
-                    // 3. Create Banner document
-                    await setDoc(doc(firestore, 'banners', bannerId), {
-                        id: bannerId,
-                        userId: user.uid,
-                        imageUrl: bannerImageUrl,
-                        description: description,
-                        whatsappNumber: whatsappNumber,
-                        position: position,
-                        categoryId: categoryId,
-                        startDate: null, // To be set by admin on approval
-                        expiryDate: null, // To be set by admin on approval
-                        status: 'Pending',
-                        createdAt: serverTimestamp(),
-                    });
-        
-                    // 4. Create Payment document
-                    await addDoc(collection(firestore, 'payments'), {
-                        id: uuidv4(),
-                        userId: user.uid,
-                        paymentMethod: paymentMethod,
-                        amount: Number(price),
-                        paymentSlipUrl: paymentSlipUrl,
-                        status: 'Pending',
-                        targetId: bannerId, // Link payment to the banner
-                        paymentFor: 'Banner',
-                        createdAt: serverTimestamp(),
-                    });
-        
-                    toast({
-                        title: 'ගෙවීම ඉදිරිපත් කරන ලදී',
-                        description: 'ඔබගේ බැනර් දැන්වීම් ගෙවීම සමාලෝචනය වෙමින් පවතින අතර අනුමත කිරීමෙන් පසු සක්‍රිය වනු ඇත.',
-                    });
-                    
-                    sessionStorage.removeItem('bannerImage');
-                    router.push('/');
-                } catch (error: any) {
-                    console.error("Inner Banner Payment submission error: ", error);
-                    toast({
-                        variant: 'destructive',
-                        title: 'ඉදිරිපත් කිරීම අසාර්ථක විය',
-                        description: error.message || 'ඔබගේ ගෙවීම් විස්තර සුරැකීමේදී දෝෂයක් ඇතිවිය.',
-                    });
-                    setIsLoading(false);
-                }
-            }
-            slipReader.onerror = (error) => {
-                 console.error("File Reader error: ", error);
-                 toast({ variant: 'destructive', title: 'ගොනු දෝෂයකි', description: 'ගෙවීම් පත්‍රිකා ගොනුව කියවීමට නොහැකි විය.'});
-                 setIsLoading(false);
-            }
+            // 3. Create Banner document
+            await setDoc(doc(firestore, 'banners', bannerId), {
+                id: bannerId,
+                userId: user.uid,
+                imageUrl: bannerImageUrl,
+                description: description,
+                whatsappNumber: whatsappNumber,
+                position: position,
+                categoryId: categoryId,
+                startDate: null,
+                expiryDate: null,
+                status: 'Pending',
+                createdAt: serverTimestamp(),
+            });
+
+            // 4. Create Payment document
+            await addDoc(collection(firestore, 'payments'), {
+                userId: user.uid,
+                paymentMethod: paymentMethod,
+                amount: Number(price),
+                paymentSlipUrl: paymentSlipUrl,
+                status: 'Pending',
+                targetId: bannerId, // Link payment to the banner
+                paymentFor: 'Banner',
+                createdAt: serverTimestamp(),
+            });
+
+            toast({
+                title: 'ගෙවීම ඉදිරිපත් කරන ලදී',
+                description: 'ඔබගේ බැනර් දැන්වීම් ගෙවීම සමාලෝචනය වෙමින් පවතින අතර අනුමත කිරීමෙන් පසු සක්‍රිය වනු ඇත.',
+            });
+            
+            sessionStorage.removeItem('bannerImage');
+            router.push('/');
 
         } catch (error: any) {
-            console.error("Outer Banner Payment submission error: ", error);
+            console.error("Banner Payment submission error: ", error);
             toast({
                 variant: 'destructive',
                 title: 'ඉදිරිපත් කිරීම අසාර්ථක විය',
                 description: error.message || 'ඔබගේ ගෙවීම ඉදිරිපත් කිරීමේදී දෝෂයක් ඇතිවිය.',
             });
+        } finally {
              setIsLoading(false);
         }
     };

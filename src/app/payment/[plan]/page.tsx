@@ -74,13 +74,13 @@ export default function PaymentPage() {
             const fileExtension = paymentSlip.name.split('.').pop();
             const fileName = `payment_slips/${user.uid}/${uuidv4()}.${fileExtension}`;
             const storageRef = ref(storage, fileName);
+            
+            // Use uploadBytes directly with the File object
             await uploadBytes(storageRef, paymentSlip);
             const imageUrl = await getDownloadURL(storageRef);
 
             // 2. Create payment document in Firestore
-            const paymentsCollection = collection(firestore, 'payments');
-            await addDoc(paymentsCollection, {
-                id: uuidv4(),
+            await addDoc(collection(firestore, 'payments'), {
                 userId: user.uid,
                 paymentMethod: paymentMethod,
                 amount: selectedPlan.price,
