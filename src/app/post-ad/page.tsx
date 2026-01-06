@@ -178,7 +178,6 @@ export default function PostAdPage() {
         }
         
         await addDoc(collection(firestore, 'ads'), {
-            id: uuidv4(),
             userId: user.uid,
             title: data.title,
             description: data.description,
